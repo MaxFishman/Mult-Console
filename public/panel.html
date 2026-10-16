@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mult Console — Panel</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="panel">
+    <header class="panel-head">
+      <div class="panel-leds">
+        <span class="led" id="pill-bridge" data-state="off"><i></i>Br</span>
+        <span class="led" id="pill-ableton" data-state="off"><i></i>Ab</span>
+        <span class="led" id="pill-midi" data-state="off"><i></i>Mi</span>
+      </div>
+      <button class="btn ghost small" id="open-main">Open ↗</button>
+    </header>
+
+    <section class="panel-track">
+      <span class="panel-color" id="strip-color"></span>
+      <div>
+        <div class="eyebrow">Now controlling</div>
+        <div class="panel-track-name" id="track-name">No track</div>
+      </div>
+    </section>
+
+    <section class="panel-units" id="panel-units"></section>
+    <div class="panel-empty" id="panel-empty">No controls mapped yet.</div>
+
+    <!-- Mini device unit -->
+    <template id="panel-unit-template">
+      <div class="panel-unit">
+        <svg viewBox="0 0 100 100" class="knob-svg mini" aria-hidden="true">
+          <circle class="knob-track" cx="50" cy="50" r="40" transform="rotate(135 50 50)" />
+          <circle class="knob-value" cx="50" cy="50" r="40" transform="rotate(135 50 50)" />
+          <circle class="knob-cap" cx="50" cy="50" r="26" />
+          <line class="knob-pointer" x1="50" y1="50" x2="50" y2="20" transform="rotate(225 50 50)" />
+        </svg>
+        <div class="panel-unit-name"></div>
+        <div class="panel-unit-val meter-text">—</div>
+      </div>
+    </template>
+
+    <script src="panel.js"></script>
+  </body>
+</html>

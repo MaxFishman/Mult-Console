@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build output / installers (large binaries — ship via Releases instead)
+dist-installers/
+dist/
+*.dmg
+*.zip
+*.blockmap
+
+# OS / editor cruft
+.DS_Store
+*.log
+.vscode/
+.idea/
+
+# Scratch
+scratchpad/

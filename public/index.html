@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mult Console</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Transport-style top bar -->
+    <header class="transport">
+      <div class="brand">
+        <img class="logo-mark" src="brand.png" alt="" aria-hidden="true" />
+        <span class="brand-name">Mult&nbsp;Console</span>
+      </div>
+      <div class="status-cluster">
+        <span class="led" id="pill-bridge" data-state="off"><i></i>Bridge</span>
+        <span class="led" id="pill-ableton" data-state="off"><i></i>Ableton</span>
+        <span class="led" id="pill-midi" data-state="off"><i></i>MIDI</span>
+        <button class="btn ghost" id="refresh-conn" title="Re-sync with Ableton after switching projects">↻ Refresh</button>
+        <button class="btn ghost" id="open-panel" hidden>Panel</button>
+        <button class="btn ghost" id="open-setup">Setup</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Preset bar -->
+      <section class="presetbar">
+        <span class="eyebrow">Preset</span>
+        <select id="preset-select" class="preset-select"></select>
+        <div class="presetbar-actions">
+          <button class="btn ghost small" id="preset-new" title="Create an empty preset">New</button>
+          <button class="btn ghost small" id="preset-duplicate" title="Copy the current preset">Duplicate</button>
+          <button class="btn ghost small" id="preset-rename">Rename</button>
+          <button class="btn ghost small" id="preset-delete">Delete</button>
+          <button class="btn ghost small" id="preset-export" title="Save this preset to a file">Export</button>
+          <button class="btn ghost small" id="preset-import" title="Load a preset from a file">Import</button>
+        </div>
+      </section>
+
+      <!-- Hero: the selected track, Session-View style -->
+      <section class="track-strip" id="track-strip">
+        <div class="strip-color" id="strip-color"></div>
+        <div class="strip-body">
+          <div class="eyebrow">Now controlling</div>
+          <div class="track-name" id="track-name">No track</div>
+          <div class="track-sub" id="track-sub">Open a Live set and click a track</div>
+        </div>
+      </section>
+
+      <!-- The control rack: one device unit per mapping -->
+      <section class="rack">
+        <div class="rack-head">
+          <h2 class="eyebrow">Control Rack</h2>
+          <button class="btn accent" id="add-mapping">+ Add control</button>
+        </div>
+        <p class="rack-hint">
+          Each unit binds one knob or fader to a parameter <em>slot</em>. The slot
+          follows whichever track you select in Live, so the same control drives
+          that slot on every track.
+        </p>
+        <div id="mappings" class="units"></div>
+        <div class="empty" id="mappings-empty">
+          Rack is empty. Add a control to start mapping.
+        </div>
+      </section>
+
+      <!-- Activity monitor -->
+      <section class="monitor">
+        <div class="monitor-head">
+          <h2 class="eyebrow">Activity</h2>
+          <button class="btn ghost" id="clear-log">Clear</button>
+        </div>
+        <div class="log" id="log"></div>
+      </section>
+    </main>
+
+    <!-- Name prompt modal (Electron blocks window.prompt) -->
+    <div class="modal-backdrop" id="name-modal" hidden>
+      <div class="modal name-modal">
+        <div class="modal-head"><h2 id="name-modal-title">Name</h2></div>
+        <input id="name-modal-input" class="name-modal-input" type="text" autocomplete="off" />
+        <div class="modal-foot">
+          <button class="btn ghost" id="name-modal-cancel">Cancel</button>
+          <button class="btn accent" id="name-modal-ok">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Setup Guide modal -->
+    <div class="modal-backdrop" id="setup-modal" hidden>
+      <div class="modal">
+        <div class="modal-head">
+          <h2>Setup</h2>
+          <button class="btn ghost small" id="close-setup">✕</button>
+        </div>
+        <p class="rack-hint">
+          Four steps connect your controller to Live. Each turns green as it's done.
+        </p>
+
+        <ol class="steps">
+          <li class="step" id="step-1">
+            <div class="step-head">
+              <span class="step-badge">1</span>
+              <h3>Install AbletonOSC</h3>
+              <span class="step-state" id="step-1-state">checking…</span>
+            </div>
+            <p class="step-body">
+              AbletonOSC lets this app talk to Live. It's bundled in — install it
+              into Ableton's Remote Scripts folder.
+            </p>
+            <div class="step-actions" id="step-1-actions">
+              <button class="btn accent" id="install-osc">Install AbletonOSC automatically</button>
+              <button class="btn ghost small" id="choose-folder">Choose folder…</button>
+              <button class="btn ghost small" id="reveal-osc" hidden>Show in Finder</button>
+            </div>
+            <div class="step-note" id="step-1-note"></div>
+            <div class="step-manual" id="step-1-manual" hidden>
+              <p>Running in a browser, so install manually:</p>
+              <ol>
+                <li>Download <a href="https://github.com/ideoforms/AbletonOSC" target="_blank" rel="noopener">AbletonOSC</a>.</li>
+                <li>Copy the <code>AbletonOSC</code> folder into Live's
+                  <code>User Library/Remote Scripts/</code> folder.</li>
+              </ol>
+            </div>
+          </li>
+
+          <li class="step" id="step-2">
+            <div class="step-head">
+              <span class="step-badge">2</span>
+              <h3>Restart Ableton Live</h3>
+              <span class="step-state muted">manual</span>
+            </div>
+            <p class="step-body">
+              Live only scans for Remote Scripts when it launches. Quit and reopen
+              Live (or open it now if it's closed).
+            </p>
+          </li>
+
+          <li class="step" id="step-3">
+            <div class="step-head">
+              <span class="step-badge">3</span>
+              <h3>Enable the Control Surface</h3>
+              <span class="step-state" id="step-3-state">waiting…</span>
+            </div>
+            <p class="step-body">
+              In Live: <strong>Settings → Link, Tempo &amp; MIDI → MIDI</strong>.
+              Under <strong>Control Surface</strong>, pick <strong>AbletonOSC</strong>
+              (Input/Output = None). Live's status bar will read
+              “AbletonOSC: Listening for OSC on port 11000.”
+            </p>
+            <div class="step-note">Turns the <strong>Ableton</strong> light green automatically.</div>
+          </li>
+
+          <li class="step" id="step-4">
+            <div class="step-head">
+              <span class="step-badge">4</span>
+              <h3>Connect your controller</h3>
+              <span class="step-state" id="step-4-state">waiting…</span>
+            </div>
+            <p class="step-body">
+              Plug in your MIDI controller, close this guide, add a control, hit
+              <strong>Learn</strong>, and move a knob or fader.
+            </p>
+          </li>
+        </ol>
+
+        <div class="modal-foot">
+          <button class="btn accent" id="done-setup">Done</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Template: one device unit (mapping) -->
+    <template id="mapping-template">
+      <div class="unit">
+        <div class="unit-title">
+          <input class="map-name" type="text" placeholder="Control" />
+          <button class="remove" title="Remove control">✕</button>
+        </div>
+
+        <div class="knob">
+          <svg viewBox="0 0 100 100" class="knob-svg" aria-hidden="true">
+            <circle class="knob-track" cx="50" cy="50" r="40" transform="rotate(135 50 50)" />
+            <circle class="knob-value" cx="50" cy="50" r="40" transform="rotate(135 50 50)" />
+            <circle class="knob-cap" cx="50" cy="50" r="24" />
+            <line class="knob-ghost" x1="50" y1="50" x2="50" y2="14" transform="rotate(225 50 50)" />
+            <line class="knob-pointer" x1="50" y1="50" x2="50" y2="18" transform="rotate(225 50 50)" />
+          </svg>
+          <div class="knob-readout meter-text">—</div>
+        </div>
+
+        <div class="unit-midi">
+          <button class="btn learn">Learn</button>
+          <span class="midi-readout">unassigned</span>
+        </div>
+
+        <div class="unit-config">
+          <div class="field">
+            <label>Target</label>
+            <select class="targetkind">
+              <option value="device">Device parameter</option>
+              <option value="mixer">Track mixer</option>
+              <option value="transport">Transport — scrub</option>
+            </select>
+          </div>
+
+          <div class="field transport-field" hidden>
+            <label>Scrub</label>
+            <div class="scrub-hint">Knob <strong>0–127</strong> maps across the whole arrangement — min = start, max = end. Keep <em>Pickup</em> on so grabbing the knob doesn't jump the playhead.</div>
+          </div>
+
+          <div class="field device-field">
+            <label>Device</label>
+            <select class="device"></select>
+          </div>
+          <div class="field param-field">
+            <label>Parameter</label>
+            <select class="param"></select>
+          </div>
+
+          <div class="field mixer-field" hidden>
+            <label>Mixer control</label>
+            <select class="mixerfield">
+              <option value="volume">Volume</option>
+              <option value="panning">Pan</option>
+              <option value="send">Send</option>
+              <option value="mute">Mute</option>
+              <option value="solo">Solo</option>
+              <option value="arm">Arm</option>
+            </select>
+          </div>
+          <div class="field send-field" hidden>
+            <label>Send #</label>
+            <select class="sendindex">
+              <option value="0">A</option>
+              <option value="1">B</option>
+              <option value="2">C</option>
+              <option value="3">D</option>
+            </select>
+          </div>
+
+          <div class="field opts-field">
+            <label>Options</label>
+            <div class="opts">
+              <label class="chk pickup-chk"><input type="checkbox" class="pickup" /> Pickup</label>
+              <label class="chk"><input type="checkbox" class="invert" /> Invert</label>
+              <label class="chk button-chk" hidden>
+                <select class="buttonmode">
+                  <option value="toggle">Toggle</option>
+                  <option value="momentary">Momentary</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>

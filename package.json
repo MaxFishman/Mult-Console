@@ -1,0 +1,73 @@
+{
+  "name": "mult-console",
+  "productName": "Mult Console",
+  "version": "1.0.0",
+  "description": "Map a single MIDI fader/knob to native plugin parameters on whichever Ableton track is currently selected.",
+  "author": "Daniel Fishman",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "web": "node bridge/server.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "osc": "^2.4.4",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "org.fishman.multconsole",
+    "productName": "Mult Console",
+    "npmRebuild": false,
+    "afterPack": "build/afterPack.js",
+    "directories": {
+      "output": "dist-installers",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "bridge/**/*",
+      "public/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "vendor/AbletonOSC",
+        "to": "AbletonOSC"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.music",
+      "icon": "build/icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Audio"
+    }
+  }
+}
