@@ -19,6 +19,13 @@ contextBridge.exposeInMainWorld("desktop", {
   // Push connection/track status up to the main process (drives the tray).
   reportStatus: (payload) => ipcRenderer.send("status:update", payload),
 
+  // Application updates are checked/downloaded by the main process.
+  updates: {
+    check: () => ipcRenderer.invoke("updates:check"),
+    install: () => ipcRenderer.invoke("updates:install"),
+    onStatus: (cb) => ipcRenderer.on("updates:status", (_event, status) => cb(status)),
+  },
+
   // Bring the main window forward (used by the popover panel).
   openMain: () => ipcRenderer.send("ui:open-main"),
 

@@ -131,6 +131,20 @@ just **right-click the app → Open → Open** once, and it runs from then on.
 (To remove that step entirely you'd sign + notarize with an Apple Developer
 account.) The app icon is set from `build/icon.icns`.
 
+### In-app updates
+
+Packaged desktop builds check the latest GitHub release at startup and can also
+check on demand with **Check for updates** in the app. Available updates download
+in the background; select **Restart to install** when the download finishes.
+Browser mode and development builds do not self-update.
+
+To publish an update, increment the version in `package.json`, build with
+`npm run dist` (or the platform-specific build command), and attach every
+generated file in `dist-installers/` to the matching GitHub release. In
+particular, keep the generated `latest*.yml` and `.blockmap` files alongside
+their installers/ZIPs; the app uses this metadata to discover and download
+updates. The build's GitHub Releases update provider is configured for this repo.
+
 > Whoever runs it still needs AbletonOSC in Live — but the app installs that for
 > them on first launch via the Setup guide (step 1). Only restarting Live and
 > picking the Control Surface are manual.
