@@ -12,6 +12,7 @@ const {
 const path = require("path");
 const fs = require("fs");
 const os = require("os");
+const { autoUpdater } = require("electron-updater");
 const { startBridge } = require("../bridge/server");
 
 // Product name (shown in the macOS app menu, About box, etc.).
@@ -21,6 +22,7 @@ let mainWindow = null;
 let panelWindow = null;
 let tray = null;
 let bridge = null;
+let updateDownloaded = false;
 
 // Live status mirrored from the renderer; drives the tray.
 const status = {
@@ -86,6 +88,42 @@ function installAbletonOsc(remoteScriptsDir = defaultRemoteScriptsDir()) {
 }
 
 function registerIpc() {
+  autoUpdater.autoDownload = true;
+  autoUpdater.autoInstallOnAppQuit = true;
+  autoUpdater.on("checking-for-update", () => sendUpdateStatus({ status: "checking" }));
+  autoUpdater.on("update-available", (info) => {
+    sendUpdateStatus({ status: "available", version: info.version });
+  });
+  autoUpdater.on("update-not-available", (info) => {
+    sendUpdateStatus({ status: "current", version: info.version });
+  });
+  autoUpdater.on("download-progress", (progress) => {
+    sendUpdateStatus({ status: "downloading", percent: progress.percent });
+  });
+  autoUpdater.on("update-downloaded", (info) => {
+    updateDownloaded = true;
+    sendUpdateStatus({ status: "downloaded", version: info.version });
+  });
+  autoUpdater.on("error", (err) => {
+    sendUpdateStatus({ status: "error", message: err.message });
+  });
+
+  ipcMain.handle("updates:check", async () => {
+    if (!app.isPackaged) return { status: "unavailable" };
+    try {
+      await autoUpdater.checkForUpdates();
+      return { status: "checking" };
+    } catch (err) {
+      sendUpdateStatus({ status: "error", message: err.message });
+      return { status: "error", message: err.message };
+    }
+  });
+  ipcMain.handle("updates:install", () => {
+    if (!app.isPackaged || !updateDownloaded) return false;
+    autoUpdater.quitAndInstall();
+    return true;
+  });
+
   ipcMain.handle("abletonosc:status", (_e, dir) => abletonOscStatus(dir || undefined));
   ipcMain.handle("abletonosc:install", (_e, dir) => installAbletonOsc(dir || undefined));
   ipcMain.handle("abletonosc:chooseFolder", async () => {
@@ -185,6 +223,12 @@ function registerIpc() {
       return null;
     }
   });
+}
+
+function sendUpdateStatus(status) {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.webContents.send("updates:status", status);
+  }
 }
 
 // Use a STABLE localhost port so the UI origin (and its localStorage, where
@@ -467,6 +511,9 @@ app.whenReady().then(() => {
   registerIpc();
   createWindow();
   createTray();
+  if (app.isPackaged) setTimeout(() => autoUpdater.checkForUpdates().catch((err) => {
+    sendUpdateStatus({ status: "error", message: err.message });
+  }), 5000);
 
   app.on("activate", () => {
     // Dock click: bring the main window back from the tray.

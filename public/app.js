@@ -1420,6 +1420,50 @@ if (window.desktop) {
   if (window.desktop.onOpenSetup) window.desktop.onOpenSetup(() => openSetup());
   if (window.desktop.onAddControl) window.desktop.onAddControl(() => addMapping());
   if (window.desktop.onRefresh) window.desktop.onRefresh(() => refreshConnection());
+  const updates = window.desktop.updates;
+  const updateBtn = document.getElementById("check-updates");
+  if (updates && updateBtn) {
+    updateBtn.hidden = false;
+    const checkForUpdates = async () => {
+      updateBtn.textContent = "Checking…";
+      updateBtn.disabled = true;
+      const result = await updates.check();
+      if (result.status === "error") showUpdateStatus(result);
+    };
+    const resetUpdateButton = () => {
+      updateBtn.textContent = "Check for updates";
+      updateBtn.disabled = false;
+      updateBtn.title = "";
+      updateBtn.onclick = checkForUpdates;
+    };
+    const showUpdateStatus = (update) => {
+      if (update.status === "checking") {
+        updateBtn.textContent = "Checking…";
+        updateBtn.disabled = true;
+      } else if (update.status === "available") {
+        updateBtn.textContent = `Downloading ${update.version}…`;
+        updateBtn.disabled = true;
+      } else if (update.status === "downloading") {
+        updateBtn.textContent = `Downloading ${Math.floor(update.percent)}%`;
+        updateBtn.disabled = true;
+      } else if (update.status === "downloaded") {
+        updateBtn.textContent = `Restart to install ${update.version}`;
+        updateBtn.disabled = false;
+        updateBtn.onclick = () => updates.install();
+      } else if (update.status === "current") {
+        updateBtn.textContent = "Up to date";
+        updateBtn.disabled = true;
+        setTimeout(resetUpdateButton, 4000);
+      } else if (update.status === "error") {
+        updateBtn.textContent = "Update failed — retry";
+        updateBtn.disabled = false;
+        updateBtn.title = update.message || "";
+        updateBtn.onclick = checkForUpdates;
+      }
+    };
+    updateBtn.onclick = checkForUpdates;
+    updates.onStatus(showUpdateStatus);
+  }
   const panelBtn = document.getElementById("open-panel");
   if (panelBtn && window.desktop.togglePanel) {
     panelBtn.hidden = false;
