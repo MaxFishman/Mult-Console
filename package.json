@@ -16,6 +16,7 @@
     "dist:win": "electron-builder --win"
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "express": "^4.19.2",
     "osc": "^2.4.4",
     "ws": "^8.18.0"
