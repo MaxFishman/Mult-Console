@@ -11,6 +11,35 @@ MIDI controller ──(Web MIDI)──▶ Browser app ──(WebSocket)──▶
                                      └───────────── selected track + parameter values ◀─────┘
 ```
 
+## Install (macOS)
+
+**Easiest — one line.** Paste this into Terminal; it downloads the right build,
+installs it to Applications, clears the Gatekeeper flag, and opens it:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/MaxFishman/mult-console/main/install.sh | bash
+```
+
+**Or download the `.dmg`** from the
+[latest release](https://github.com/MaxFishman/mult-console/releases/latest):
+drag **Mult Console** to Applications, then open it **once** this way (the app
+is ad-hoc signed but not Apple-notarized, so macOS asks the first time):
+
+- **macOS 15 (Sequoia):** double-click it, then go to **System Settings →
+  Privacy & Security → "Open Anyway."**
+- **macOS 14 and earlier:** **right-click the app → Open → Open.**
+- **If it says "damaged"** (macOS quarantines downloads), run once:
+  ```bash
+  xattr -cr "/Applications/Mult Console.app"
+  ```
+
+> Why the extra step? A silent, warning-free install requires Apple notarization
+> (a paid Apple Developer account). This app is signed but not notarized — the
+> one-line installer above does the un-quarantine step for you.
+
+After installing, open the in-app **Setup** guide once to install AbletonOSC
+into Ableton (requires **Live 11 or 12**).
+
 ## Why it's built this way
 
 Ableton has no official network API, and browsers can't speak UDP/OSC. So:
