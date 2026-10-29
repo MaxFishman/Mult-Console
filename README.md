@@ -141,8 +141,20 @@ A perpetual license — buy once, own that version forever, including all point 
 - ❌ Redistributing, reselling, or bundling the app or its installer.
 - ❌ Sharing a single-seat license across a team (grab **Studio** or **Site** instead).
 
-> **Trial:** the app is fully functional for evaluation. A license removes the trial reminder and funds ongoing development.
-> Questions about larger deployments or bespoke terms? See [Support](#support).
+<table>
+<tr>
+<td width="55%" valign="top">
+<img src="docs/img/license.png" alt="In-app license activation" />
+</td>
+<td valign="middle">
+<h3>🔑 Activate offline, in seconds</h3>
+<p><b>14-day free trial</b> — fully featured, nothing locked. After it ends the app keeps working; you'll just see a reminder to activate.</p>
+<p>Paste your license key into <b>Mult Console → License</b> and you're done. Keys are cryptographically signed and verified <b>entirely on your machine</b> — no account, no activation server, no network required. True to the app's no-cloud, no-telemetry promise.</p>
+</td>
+</tr>
+</table>
+
+> Questions about larger deployments, volume pricing, or bespoke terms? See [Support](#support).
 
 <sub>AbletonOSC is a separate, independently-licensed open-source project (MIT) and is redistributed with permission. Ableton® and Ableton Live® are trademarks of Ableton AG; Mult Console is an independent product and is not affiliated with or endorsed by Ableton.</sub>
 
@@ -286,7 +298,10 @@ npm run dist:win     # Windows .nsis installer
 
 **Publishing an update:** bump the version in `package.json`, run the build, and attach every generated file in `dist-installers/` to the matching GitHub release — including the `latest*.yml` and `.blockmap` files the auto-updater relies on. Packaged builds check GitHub Releases at startup and via **Check for updates**; downloads install on **Restart to install**. Browser and dev builds don't self-update.
 
-**Stack:** Electron · Node (Express + `ws`) · `osc` · `electron-updater` · Web MIDI · [AbletonOSC](https://github.com/ideoforms/AbletonOSC).
+**Issuing licenses (vendor):** license keys are offline Ed25519-signed tokens.
+Run `node tools/gen-keypair.js` once, then `node tools/gen-license.js --name … --email … --tier studio` per sale. The app bundles only the public key and verifies offline. Full details and the honest limitations are in [`tools/README.md`](tools/README.md). The private signing key lives in `tools/license-private.pem` and is git-ignored — **back it up and never commit it.**
+
+**Stack:** Electron · Node (Express + `ws`) · `osc` · `electron-updater` · Web MIDI · Ed25519 (built-in `crypto`) · [AbletonOSC](https://github.com/ideoforms/AbletonOSC).
 
 ---
 

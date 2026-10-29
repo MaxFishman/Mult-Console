@@ -20,10 +20,17 @@
         <button class="btn ghost" id="refresh-conn" title="Re-sync with Ableton after switching projects">↻ Refresh</button>
         <button class="btn ghost" id="open-panel" hidden>Panel</button>
         <button class="btn ghost" id="open-tracks" hidden>Tracks</button>
+        <button class="btn ghost license-chip" id="open-license" hidden>License</button>
         <button class="btn ghost" id="open-setup">Setup</button>
         <button class="btn ghost" id="check-updates" hidden>Check for updates</button>
       </div>
     </header>
+
+    <!-- Trial-expired banner (nag only; nothing is disabled) -->
+    <div class="license-banner" id="license-banner" hidden>
+      <span class="license-banner-text" id="license-banner-text"></span>
+      <button class="btn accent small" id="license-banner-activate">Activate</button>
+    </div>
 
     <main>
       <!-- Preset bar -->
@@ -85,6 +92,34 @@
         <div class="modal-foot">
           <button class="btn ghost" id="name-modal-cancel">Cancel</button>
           <button class="btn accent" id="name-modal-ok">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- License / activation modal -->
+    <div class="modal-backdrop" id="license-modal" hidden>
+      <div class="modal license-box">
+        <div class="modal-head">
+          <h2>License</h2>
+          <button class="btn ghost small" id="close-license">✕</button>
+        </div>
+
+        <div class="license-status" id="license-status"></div>
+
+        <div class="license-activate" id="license-activate-area">
+          <p class="rack-hint">Paste your license key below to activate this copy.</p>
+          <textarea id="license-key-input" class="license-key-input" rows="3"
+            placeholder="MULT.…" autocomplete="off" spellcheck="false"></textarea>
+          <div class="license-feedback" id="license-feedback"></div>
+        </div>
+
+        <div class="modal-foot license-foot">
+          <a class="btn ghost small" id="license-buy"
+             href="https://github.com/MaxFishman/mult-console#pricing--licensing"
+             target="_blank" rel="noopener">Buy a license ↗</a>
+          <span class="license-foot-spacer"></span>
+          <button class="btn ghost small" id="license-deactivate" hidden>Deactivate</button>
+          <button class="btn accent" id="license-activate">Activate</button>
         </div>
       </div>
     </div>

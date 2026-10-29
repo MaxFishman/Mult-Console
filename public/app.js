@@ -1413,6 +1413,125 @@ function maybeAutoOpenSetup() {
 }
 
 // ---------------------------------------------------------------------------
+// Licensing / trial  (desktop only; keys are verified in the main process)
+// ---------------------------------------------------------------------------
+const licenseUI = {
+  modal: document.getElementById("license-modal"),
+  statusBox: document.getElementById("license-status"),
+  activateArea: document.getElementById("license-activate-area"),
+  input: document.getElementById("license-key-input"),
+  feedback: document.getElementById("license-feedback"),
+  chip: document.getElementById("open-license"),
+  banner: document.getElementById("license-banner"),
+  bannerText: document.getElementById("license-banner-text"),
+  activateBtn: document.getElementById("license-activate"),
+  deactivateBtn: document.getElementById("license-deactivate"),
+};
+let licenseState = { state: "dev" };
+
+function licCap(s) { return s ? s[0].toUpperCase() + s.slice(1) : ""; }
+function licEsc(s) {
+  return String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// Paint the header chip + expired banner from a status object.
+function renderLicense(st) {
+  licenseState = st || { state: "dev" };
+  const s = licenseState;
+
+  const chip = licenseUI.chip;
+  if (chip) {
+    if (s.state === "licensed") { chip.hidden = false; chip.textContent = "Licensed"; chip.dataset.state = "licensed"; }
+    else if (s.state === "trial") { chip.hidden = false; chip.textContent = `Trial · ${s.trialDaysLeft}d`; chip.dataset.state = "trial"; }
+    else if (s.state === "expired") { chip.hidden = false; chip.textContent = "Activate"; chip.dataset.state = "expired"; }
+    else { chip.hidden = true; chip.removeAttribute("data-state"); } // dev
+  }
+
+  if (licenseUI.banner) {
+    const expired = s.state === "expired";
+    licenseUI.banner.hidden = !expired;
+    if (expired) {
+      licenseUI.bannerText.textContent =
+        "Your Mult Console trial has ended. Everything still works — activate a license to clear this message and support development.";
+    }
+  }
+  renderLicenseStatusBox();
+}
+
+function renderLicenseStatusBox() {
+  const s = licenseState;
+  const box = licenseUI.statusBox;
+  if (!box) return;
+  box.dataset.state = s.state;
+  let html = "";
+  let showActivate = true, showDeactivate = false, activateLabel = "Activate";
+
+  if (s.state === "licensed") {
+    html = `<div class="lic-headline">✓ Licensed — ${licCap(s.tier)}</div>`
+      + `<div class="lic-sub">Registered to <b>${licEsc(s.name || "")}</b>`
+      + `${s.email ? ` · ${licEsc(s.email)}` : ""}</div>`;
+    showActivate = true; showDeactivate = true; activateLabel = "Re-activate";
+  } else if (s.state === "trial") {
+    html = `<div class="lic-headline">Trial — ${s.trialDaysLeft} day${s.trialDaysLeft === 1 ? "" : "s"} left</div>`
+      + `<div class="lic-sub">Full features during the trial. Activate anytime.</div>`;
+  } else if (s.state === "expired") {
+    html = `<div class="lic-headline">Trial expired</div>`
+      + `<div class="lic-sub">The app keeps working — a license just removes the reminder.</div>`;
+  } else {
+    html = `<div class="lic-headline">Developer build</div>`
+      + `<div class="lic-sub">Licensing is enforced in packaged builds only.</div>`;
+  }
+  box.innerHTML = html;
+  licenseUI.activateArea.hidden = !showActivate;
+  licenseUI.deactivateBtn.hidden = !showDeactivate;
+  licenseUI.activateBtn.textContent = activateLabel;
+}
+
+function openLicense() {
+  renderLicenseStatusBox();
+  setLicenseFeedback("", null);
+  licenseUI.modal.hidden = false;
+  licenseUI.input.focus();
+}
+function closeLicense() { licenseUI.modal.hidden = true; }
+
+function setLicenseFeedback(msg, ok) {
+  licenseUI.feedback.textContent = msg || "";
+  licenseUI.feedback.className = "license-feedback" + (ok === true ? " ok" : ok === false ? " bad" : "");
+}
+
+async function activateLicense() {
+  if (!window.desktop || !window.desktop.license) return;
+  const key = licenseUI.input.value.trim();
+  if (!key) { setLicenseFeedback("Paste a license key first.", false); return; }
+  const res = await window.desktop.license.activate(key);
+  if (res && res.ok) {
+    licenseUI.input.value = "";
+    renderLicense(res.status);
+    setLicenseFeedback("✓ Activated. Thank you!", true);
+  } else {
+    setLicenseFeedback("✗ " + ((res && res.error) || "Activation failed."), false);
+  }
+}
+
+async function deactivateLicense() {
+  if (!window.desktop || !window.desktop.license) return;
+  const res = await window.desktop.license.deactivate();
+  renderLicense(res.status);
+  setLicenseFeedback("License removed from this machine.", true);
+}
+
+if (licenseUI.modal) {
+  if (licenseUI.chip) licenseUI.chip.onclick = openLicense;
+  document.getElementById("close-license").onclick = closeLicense;
+  licenseUI.activateBtn.onclick = activateLicense;
+  licenseUI.deactivateBtn.onclick = deactivateLicense;
+  document.getElementById("license-banner-activate").onclick = openLicense;
+  licenseUI.modal.addEventListener("click", (e) => { if (e.target === licenseUI.modal) closeLicense(); });
+}
+
+// ---------------------------------------------------------------------------
 // Boot
 // ---------------------------------------------------------------------------
 // Tray/app-menu commands + Panel button (desktop only).
@@ -1473,6 +1592,15 @@ if (window.desktop) {
   if (tracksBtn && window.desktop.openTracks) {
     tracksBtn.hidden = false;
     tracksBtn.onclick = () => window.desktop.openTracks();
+  }
+  if (window.desktop.onOpenLicense) window.desktop.onOpenLicense(() => openLicense());
+  if (window.desktop.license) {
+    window.desktop.license.onStatus((st) => renderLicense(st));
+    window.desktop.license.status().then((st) => {
+      renderLicense(st);
+      // Nag on launch once the trial has ended (dismissible; nothing is blocked).
+      if (st.state === "expired") openLicense();
+    });
   }
 }
 

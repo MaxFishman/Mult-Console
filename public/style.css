@@ -573,6 +573,66 @@ body.tracks {
 .track-row[data-selected="1"] .track-label { color: #fff; font-weight: 700; }
 .track-row[data-selected="1"] .track-caret { opacity: 1; color: var(--track-color); }
 
+/* --------------------------------------------------------------- Licensing */
+/* Header chip reflects trial/license state. */
+.license-chip[data-state="trial"] { color: var(--accent); }
+.license-chip[data-state="expired"] {
+  color: var(--accent-ink); background: var(--accent); border-color: #d98f00;
+}
+.license-chip[data-state="expired"]:hover { filter: brightness(1.1); color: var(--accent-ink); }
+.license-chip[data-state="licensed"] { color: var(--good); }
+
+/* Trial-expired banner (nag only). */
+.license-banner {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 16px;
+  background: linear-gradient(var(--accent), #e09a1a);
+  color: var(--accent-ink);
+  border-bottom: 1px solid #b87900;
+  font-size: 12px; font-weight: 700;
+}
+.license-banner[hidden] { display: none; }
+.license-banner-text { flex: 1; letter-spacing: 0.2px; }
+.license-banner .btn.accent {
+  background: var(--accent-ink); color: var(--accent); border-color: #000;
+}
+
+/* License modal. */
+.license-box { max-width: 520px; }
+.license-status {
+  margin-top: 14px; padding: 13px 15px;
+  background: var(--live-bg-2); border: 1px solid var(--live-line);
+  border-left: 3px solid var(--live-line-soft);
+  border-radius: 2px; font-size: 13px; line-height: 1.5;
+}
+.license-status[data-state="licensed"] { border-left-color: var(--good); }
+.license-status[data-state="trial"] { border-left-color: var(--accent); }
+.license-status[data-state="expired"] { border-left-color: var(--bad); }
+.license-status .lic-headline {
+  font-weight: 700; font-size: 14px; color: var(--live-text); margin: 0 0 4px;
+}
+.license-status .lic-sub { color: var(--live-text-dim); font-size: 12px; }
+.license-status .lic-sub b { color: var(--live-text); font-weight: 700; }
+
+.license-activate { margin-top: 14px; }
+.license-key-input {
+  width: 100%;
+  background: var(--live-bg-2); border: 1px solid var(--live-line);
+  color: var(--live-text); border-radius: 3px;
+  padding: 10px 11px; font-size: 12px;
+  font-family: var(--font-mono); resize: vertical; word-break: break-all;
+}
+.license-key-input:focus { outline: 1px solid var(--select); }
+.license-feedback {
+  min-height: 16px; margin-top: 8px;
+  font-size: 12px; font-family: var(--font-mono);
+}
+.license-feedback.ok { color: var(--good); }
+.license-feedback.bad { color: var(--bad); }
+
+.license-foot { align-items: center; gap: 8px; }
+.license-foot-spacer { flex: 1; }
+
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }

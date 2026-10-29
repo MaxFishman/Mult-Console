@@ -16,3 +16,6 @@ dist/
 
 # Scratch
 scratchpad/
+
+# License signing — SECRET. Never commit. (The public key in electron/ IS committed.)
+tools/license-private.pem

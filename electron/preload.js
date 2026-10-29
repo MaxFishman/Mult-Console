@@ -35,6 +35,14 @@ contextBridge.exposeInMainWorld("desktop", {
   // Open the Track Navigator pop-out window.
   openTracks: () => ipcRenderer.send("ui:open-tracks"),
 
+  // Licensing / trial (verified in the main process against the bundled key).
+  license: {
+    status: () => ipcRenderer.invoke("license:status"),
+    activate: (key) => ipcRenderer.invoke("license:activate", key),
+    deactivate: () => ipcRenderer.invoke("license:deactivate"),
+    onStatus: (cb) => ipcRenderer.on("license:status", (_e, status) => cb(status)),
+  },
+
   // Persistent stores (JSON files in the app's data folder).
   store: {
     loadMappings: () => ipcRenderer.invoke("mappings:load"),
@@ -47,6 +55,7 @@ contextBridge.exposeInMainWorld("desktop", {
 
   // Main process -> renderer commands triggered from the tray/app menu.
   onOpenSetup: (cb) => ipcRenderer.on("ui:open-setup", () => cb()),
+  onOpenLicense: (cb) => ipcRenderer.on("ui:open-license", () => cb()),
   onAddControl: (cb) => ipcRenderer.on("ui:add-control", () => cb()),
   onRefresh: (cb) => ipcRenderer.on("ui:refresh", () => cb()),
 });

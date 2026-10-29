@@ -14,6 +14,7 @@ const fs = require("fs");
 const os = require("os");
 const { autoUpdater } = require("electron-updater");
 const { startBridge } = require("../bridge/server");
+const { createLicense } = require("./license");
 
 // Product name (shown in the macOS app menu, About box, etc.).
 app.setName("Mult Console");
@@ -24,6 +25,17 @@ let tracksWindow = null;
 let tray = null;
 let bridge = null;
 let updateDownloaded = false;
+let license = null;
+
+// Broadcast license state to every open window so banners/pills stay in sync.
+function broadcastLicense() {
+  if (!license) return;
+  const s = license.status();
+  for (const w of [mainWindow, panelWindow, tracksWindow]) {
+    if (w && !w.isDestroyed()) w.webContents.send("license:status", s);
+  }
+  updateTray();
+}
 
 // Live status mirrored from the renderer; drives the tray.
 const status = {
@@ -123,6 +135,21 @@ function registerIpc() {
     if (!app.isPackaged || !updateDownloaded) return false;
     autoUpdater.quitAndInstall();
     return true;
+  });
+
+  // ---- Licensing / trial ----
+  ipcMain.handle("license:status", () => (license ? license.status() : { state: "dev" }));
+  ipcMain.handle("license:activate", (_e, key) => {
+    if (!license) return { ok: false, error: "License not ready.", status: { state: "dev" } };
+    const res = license.activate(key);
+    if (res.ok) broadcastLicense();
+    return res;
+  });
+  ipcMain.handle("license:deactivate", () => {
+    if (!license) return { ok: false, status: { state: "dev" } };
+    const res = license.deactivate();
+    broadcastLicense();
+    return res;
   });
 
   ipcMain.handle("abletonosc:status", (_e, dir) => abletonOscStatus(dir || undefined));
@@ -358,6 +385,37 @@ function buildTrayIcon(filled) {
 let trayIconFilled = null;
 let trayIconHollow = null;
 
+// Tray rows reflecting license/trial state, with an Activate shortcut.
+function licenseTrayItems() {
+  const s = license ? license.status() : { state: "dev" };
+  const openActivate = () => {
+    showMainWindow();
+    if (mainWindow) mainWindow.webContents.send("ui:open-license");
+  };
+  if (s.state === "licensed") {
+    const tier = s.tier ? s.tier[0].toUpperCase() + s.tier.slice(1) : "";
+    return [
+      { label: `✓ Licensed — ${tier}`, enabled: false },
+      { type: "separator" },
+    ];
+  }
+  if (s.state === "trial") {
+    return [
+      { label: `Trial — ${s.trialDaysLeft} day${s.trialDaysLeft === 1 ? "" : "s"} left`, enabled: false },
+      { label: "Activate license…", click: openActivate },
+      { type: "separator" },
+    ];
+  }
+  if (s.state === "expired") {
+    return [
+      { label: "Trial expired", enabled: false },
+      { label: "Activate license…", click: openActivate },
+      { type: "separator" },
+    ];
+  }
+  return []; // dev
+}
+
 function updateTray() {
   if (!tray) return;
   if (!trayIconFilled) trayIconFilled = buildTrayIcon(true);
@@ -385,6 +443,7 @@ function updateTray() {
       enabled: false,
     },
     { type: "separator" },
+    ...licenseTrayItems(),
     { label: "Open Mult Console", click: showMainWindow },
     { label: "Quick panel…", click: () => togglePanel() },
     { label: "Track list…", click: () => showTracksWindow() },
@@ -553,6 +612,18 @@ app.whenReady().then(() => {
       app.dock.setIcon(nativeImage.createFromPath(path.join(__dirname, "..", "build", "icon.png")));
     } catch {}
   }
+  // Load the bundled public key and spin up the license/trial manager.
+  try {
+    const publicKeyPem = fs.readFileSync(path.join(__dirname, "license-public.pem"), "utf8");
+    license = createLicense({
+      userDataDir: app.getPath("userData"),
+      publicKeyPem,
+      isPackaged: app.isPackaged,
+    });
+  } catch (err) {
+    console.error("[license] init failed:", err.message);
+  }
+
   buildMenu();
   registerIpc();
   createWindow();
