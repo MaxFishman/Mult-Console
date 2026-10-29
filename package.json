@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "description": "Map a single MIDI fader/knob to native plugin parameters on whichever Ableton track is currently selected.",
   "author": "Daniel Fishman",
-  "license": "MIT",
+  "license": "UNLICENSED",
+  "private": true,
   "type": "commonjs",
   "main": "electron/main.js",
   "scripts": {

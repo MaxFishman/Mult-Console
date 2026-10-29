@@ -1,0 +1,61 @@
+Mult Console — End User License Agreement
+Copyright (c) 2026 Daniel Fishman. All rights reserved.
+
+This software ("Mult Console") is commercial, proprietary software. It is
+licensed, not sold. By downloading, installing, or using it you agree to the
+terms below.
+
+1. LICENSE GRANT
+   Upon purchase of a valid license, you are granted a non-exclusive,
+   non-transferable, perpetual license to install and use the version of
+   Mult Console you purchased, subject to the seat/activation limits of your
+   purchased tier:
+     - Solo:   1 machine
+     - Studio: up to 3 machines
+     - Site:   unlimited installations within a single physical facility
+   Activations may be moved between machines you own. All 1.x point updates are
+   included with your license; a future major version (e.g. 2.0) may require a
+   separate upgrade.
+
+2. PERMITTED USE
+   You may use Mult Console in paid, commercial, and professional work —
+   including live performance, studio production, and client projects — with no
+   additional royalty or per-project fee.
+
+3. EVALUATION
+   Unlicensed copies may be used for reasonable evaluation. A license is
+   required for continued use.
+
+4. RESTRICTIONS
+   You may NOT:
+     a. redistribute, resell, sublicense, rent, lease, or lend the software or
+        its installers;
+     b. bundle the software into another product for distribution;
+     c. share a single-seat license across multiple users or machines beyond
+        your tier's limits;
+     d. remove or alter any copyright, trademark, or license notices.
+   The source code in this repository is published for transparency and to let
+   licensed users self-host and build their own copies. It does not place the
+   software in the public domain or grant any right to redistribute or resell.
+
+5. THIRD-PARTY COMPONENTS
+   Mult Console incorporates and/or installs AbletonOSC, an independent
+   open-source project licensed under the MIT License and redistributed with
+   permission; it remains governed by its own license. Other open-source
+   dependencies retain their respective licenses. Ableton and Ableton Live are
+   trademarks of Ableton AG; Mult Console is an independent product and is not
+   affiliated with, sponsored by, or endorsed by Ableton AG.
+
+6. NO WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+7. LIMITATION OF LIABILITY
+   IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM,
+   OUT OF, OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
+
+For licensing questions, volume/site deployments, or custom terms, contact the
+author via https://github.com/MaxFishman/mult-console/issues.
