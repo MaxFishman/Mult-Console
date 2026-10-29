@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mult Console — Tracks</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="tracks">
+    <header class="tracks-head">
+      <div class="tracks-title">
+        <span class="eyebrow">Tracks</span>
+        <span class="tracks-count" id="tracks-count"></span>
+      </div>
+      <div class="tracks-head-actions">
+        <span class="led small" id="pill-ableton" data-state="off"><i></i>Ab</span>
+        <button class="btn ghost small" id="tracks-refresh" title="Re-read tracks from Live">↻</button>
+      </div>
+    </header>
+
+    <p class="tracks-hint">Click a track to select it in Live. Your mapped knobs follow.</p>
+
+    <section class="tracklist" id="tracklist"></section>
+    <div class="tracks-empty" id="tracks-empty">Waiting for Ableton…</div>
+
+    <template id="track-row-template">
+      <button class="track-row" type="button">
+        <span class="track-swatch"></span>
+        <span class="track-index"></span>
+        <span class="track-label"></span>
+        <span class="track-caret">▶</span>
+      </button>
+    </template>
+
+    <script src="tracks.js"></script>
+  </body>
+</html>

@@ -43,6 +43,7 @@ You have one great hardware controller and a session full of tracks. In vanilla 
 | | |
 |---|---|
 | 🎛️ **Map once, play everywhere** | A control follows the selected track by position, so one knob drives "Filter Cutoff" on every synth in the set. |
+| 🧭 **Track Navigator** | A pop-out list of every track in your set — click one to select it in Live, and your mapped knobs jump to it. Hands-free track switching. |
 | ⚡ **MIDI Learn in seconds** | Click **Learn**, wiggle a fader — it's bound. CC messages from any class-compliant controller. |
 | 🎚️ **Beyond plugin params** | Target device parameters, track mixer (volume, pan, sends, mute/solo/arm), or scrub the arrangement timeline. |
 | 🪄 **Macro-friendly** | Point at a Rack's Macros to sweep several plugin parameters from a single knob per track. |
@@ -54,6 +55,19 @@ You have one great hardware controller and a session full of tracks. In vanilla 
 ---
 
 ## See it work
+
+<table>
+<tr>
+<td width="38%" valign="top">
+<img src="docs/img/tracks.png" alt="Track Navigator window" />
+</td>
+<td valign="middle">
+<h3>🧭 Track Navigator</h3>
+<p>Pop out the full track list beside Live. Every track shows its name and Live color, with the selected one highlighted. <b>Click any row to select that track in Live</b> — and because every mapped knob follows the selection, your whole controller instantly re-targets. Switch tracks without touching the mouse-pointer dance in Live's session view.</p>
+<p><sub>Open with the <b>Tracks</b> button, the tray menu, or <code>⌘T</code>.</sub></p>
+</td>
+</tr>
+</table>
 
 <table>
 <tr>
@@ -202,6 +216,7 @@ AbletonOSC listens on UDP **11000** and replies on **11001** — the defaults th
 
 - **Macros:** point a mapping at an Instrument/Audio Rack's Macro parameters to drive several plugin params from one knob per track.
 - **Multiple controls:** add as many mappings as you have knobs/faders — they all follow selection independently.
+- **Track Navigator (`⌘T`):** pop out the track list and click to jump Live's selection — all your knobs re-target instantly. Great for hands-free switching mid-set.
 - **Pickup:** keep it on for live use so grabbing a knob doesn't jump the value; it catches when it passes the current position.
 - **Invert:** flip a control's direction per mapping.
 - **Presets:** save a mapping set per rig and **Export** it to a file to share or back up.

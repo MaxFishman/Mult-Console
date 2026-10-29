@@ -1469,6 +1469,11 @@ if (window.desktop) {
     panelBtn.hidden = false;
     panelBtn.onclick = () => window.desktop.togglePanel();
   }
+  const tracksBtn = document.getElementById("open-tracks");
+  if (tracksBtn && window.desktop.openTracks) {
+    tracksBtn.hidden = false;
+    tracksBtn.onclick = () => window.desktop.openTracks();
+  }
 }
 
 (async () => {

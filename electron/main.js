@@ -20,6 +20,7 @@ app.setName("Mult Console");
 
 let mainWindow = null;
 let panelWindow = null;
+let tracksWindow = null;
 let tray = null;
 let bridge = null;
 let updateDownloaded = false;
@@ -152,6 +153,8 @@ function registerIpc() {
   });
 
   ipcMain.on("ui:toggle-panel", () => togglePanel());
+
+  ipcMain.on("ui:open-tracks", () => showTracksWindow());
 
   // ---- Persistent mapping store (a JSON file in the app's data folder) ----
   const mappingsFile = () => path.join(app.getPath("userData"), "mappings.json");
@@ -384,6 +387,7 @@ function updateTray() {
     { type: "separator" },
     { label: "Open Mult Console", click: showMainWindow },
     { label: "Quick panel…", click: () => togglePanel() },
+    { label: "Track list…", click: () => showTracksWindow() },
     { label: "Refresh connection", click: () => mainWindow && mainWindow.webContents.send("ui:refresh") },
     { label: "Add control", click: () => { showMainWindow(); mainWindow && mainWindow.webContents.send("ui:add-control"); } },
     { label: "Setup…", click: () => { showMainWindow(); mainWindow && mainWindow.webContents.send("ui:open-setup"); } },
@@ -477,6 +481,47 @@ function togglePanel() {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Track Navigator (a resizable pop-out listing every track; click to select)
+// ---------------------------------------------------------------------------
+function createTracksWindow() {
+  tracksWindow = new BrowserWindow({
+    width: 300,
+    height: 620,
+    minWidth: 220,
+    minHeight: 240,
+    show: false,
+    title: "Tracks",
+    backgroundColor: "#141414",
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      contextIsolation: true,
+      nodeIntegration: false,
+      backgroundThrottling: false,
+    },
+  });
+  const target = bridge
+    ? `${bridge.url}/tracks.html`
+    : path.join(__dirname, "..", "public", "tracks.html");
+  if (bridge) tracksWindow.loadURL(target);
+  else tracksWindow.loadFile(target);
+
+  tracksWindow.on("closed", () => { tracksWindow = null; });
+}
+
+function showTracksWindow() {
+  if (!tracksWindow) {
+    createTracksWindow();
+    tracksWindow.once("ready-to-show", () => {
+      tracksWindow.show();
+      tracksWindow.focus();
+    });
+    return;
+  }
+  tracksWindow.show();
+  tracksWindow.focus();
+}
+
 function buildMenu() {
   const isMac = process.platform === "darwin";
   const template = [
@@ -486,6 +531,7 @@ function buildMenu() {
       label: "View",
       submenu: [
         { label: "Quick Panel", accelerator: "CmdOrCtrl+K", click: () => togglePanel() },
+        { label: "Track List", accelerator: "CmdOrCtrl+T", click: () => showTracksWindow() },
         { label: "Refresh Connection", accelerator: "CmdOrCtrl+R", click: () => mainWindow && mainWindow.webContents.send("ui:refresh") },
         { label: "Show Mult Console Window", accelerator: "CmdOrCtrl+Shift+O", click: showMainWindow },
         { type: "separator" },

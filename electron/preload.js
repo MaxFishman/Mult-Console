@@ -32,6 +32,9 @@ contextBridge.exposeInMainWorld("desktop", {
   // Toggle the tray popover panel (used by the in-window Panel button).
   togglePanel: () => ipcRenderer.send("ui:toggle-panel"),
 
+  // Open the Track Navigator pop-out window.
+  openTracks: () => ipcRenderer.send("ui:open-tracks"),
+
   // Persistent stores (JSON files in the app's data folder).
   store: {
     loadMappings: () => ipcRenderer.invoke("mappings:load"),
