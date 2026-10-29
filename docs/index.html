@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mult Console — One knob, every track. MIDI control for Ableton Live</title>
+  <meta name="description" content="Map one MIDI fader to a parameter slot that follows the track you select in Ableton Live. No re-mapping, ever. macOS & Windows, Live 11/12." />
+  <meta property="og:title" content="Mult Console — MIDI control for Ableton Live" />
+  <meta property="og:description" content="One knob that drives the right parameter on whichever track you select in Ableton Live. No re-mapping, ever." />
+  <meta property="og:image" content="img/banner.png" />
+  <meta property="og:type" content="website" />
+  <meta name="theme-color" content="#121212" />
+  <link rel="icon" href="img/app-icon.png" />
+  <link rel="apple-touch-icon" href="img/app-icon.png" />
+  <link rel="stylesheet" href="site.css" />
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="nav-brand" href="#top">
+        <img src="img/app-icon.png" alt="Mult Console" />
+        <b>Mult&nbsp;Console</b>
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#download">Download</a>
+        <a class="btn amber" href="#pricing">Buy — $29</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero" id="top">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <div class="eyebrow hero-kicker">MIDI control for Ableton Live</div>
+        <h1>One knob.<br />Every&nbsp;track<span class="dot">.</span></h1>
+        <p class="hero-sub">Map a single fader to a parameter slot that <b>follows the track you select</b> in Live. Build the mapping once — it works across your whole set, forever.</p>
+        <div class="hero-cta">
+          <a class="btn amber lg" href="#download">⬇ Download free trial</a>
+          <a class="btn ghost lg" href="#pricing">See pricing</a>
+        </div>
+        <div class="hero-meta">
+          <span class="pill">macOS <b>&amp;</b> Windows</span>
+          <span class="pill">Ableton Live <b>11 / 12</b></span>
+          <span class="pill">Any <b>MIDI</b> controller</span>
+        </div>
+      </div>
+      <div class="hero-shot">
+        <div class="titlebar"><i></i><i></i><i></i></div>
+        <img src="img/hero.png" alt="Mult Console main window with four controls following the selected Bass track" />
+      </div>
+    </div>
+  </header>
+
+  <!-- Trust strip -->
+  <div class="trust">
+    <div class="wrap trust-row">
+      <span>Built on <b>AbletonOSC</b></span>
+      <span>•</span>
+      <span><b>100%</b> local — no account, no cloud, no telemetry</span>
+      <span>•</span>
+      <span>Works with <b>any</b> class-compliant controller</span>
+    </div>
+  </div>
+
+  <!-- Problem -->
+  <section class="problem" id="why">
+    <div class="wrap problem-grid">
+      <div>
+        <div class="eyebrow">The problem</div>
+        <p class="lead">A knob maps to one parameter. Your set has dozens.</p>
+      </div>
+      <div class="problem-answer">
+        In vanilla Live, a knob is bound to <b>one</b> parameter on <b>one</b> device. Want it on the next track's synth? Re-map. And the next? Re-map again — and it all breaks the moment you rearrange a set.
+        <p style="margin-top:14px">Mult Console binds your knob to a <b>slot</b>, not a parameter. The slot follows the track you have selected, so one physical control drives "Filter Cutoff" on <b>every</b> synth in the project.</p>
+        <div class="mult-note"><b class="accent-amber">"Mult"</b> — from modular synthesis, where a <em>mult</em> splits one signal to many destinations. One control, routed everywhere it needs to go.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">Why studios buy it</div>
+        <h2>Everything you need to play a whole set from one controller</h2>
+        <p>Designed to feel like it belongs inside Live — and to stay out of your way on stage.</p>
+      </div>
+      <div class="feature-grid">
+        <div class="feature"><span class="ic">🎛️</span><h3>Map once, play everywhere</h3><p>A control follows the selected track by position, so one knob drives the same parameter on every track in the set.</p></div>
+        <div class="feature"><span class="ic">🧭</span><h3>Track Navigator</h3><p>Pop out a list of every track — click one to select it in Live, and your mapped knobs instantly jump to it. Hands-free switching.</p></div>
+        <div class="feature"><span class="ic">⚡</span><h3>MIDI Learn in seconds</h3><p>Click <b>Learn</b>, wiggle a fader — it's bound. Works with Control Change from any class-compliant controller.</p></div>
+        <div class="feature"><span class="ic">🎚️</span><h3>Beyond plugin params</h3><p>Target device parameters, the track mixer (volume, pan, sends, mute / solo / arm), or scrub the arrangement timeline.</p></div>
+        <div class="feature"><span class="ic">🪄</span><h3>Macro-friendly</h3><p>Point at a Rack's Macros to sweep several plugin parameters from a single knob — per track.</p></div>
+        <div class="feature"><span class="ic">🔒</span><h3>Pickup mode</h3><p>Grabbing a knob won't jump the value — it "catches" when it passes the current position. Safe for live use.</p></div>
+        <div class="feature"><span class="ic">💾</span><h3>Presets per rig</h3><p>Save, duplicate, import and export mapping sets. One for the studio, one for the tour.</p></div>
+        <div class="feature"><span class="ic">🖥️</span><h3>Lives in the menu bar</h3><p>A compact popover shows your knobs moving in real time while the main window is closed.</p></div>
+        <div class="feature"><span class="ic">🔄</span><h3>Auto-updating</h3><p>Packaged builds check for new releases and update themselves in place.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Showcase -->
+  <section class="showcases">
+    <div class="wrap">
+      <div class="showcase">
+        <div class="showcase-media narrow"><img src="img/tracks.png" alt="Track Navigator window" /></div>
+        <div class="showcase-copy">
+          <h3><span class="ic">🧭</span>Track Navigator</h3>
+          <p>Pop out the full track list beside Live. Every track shows its name and Live color, with the selected one highlighted.</p>
+          <p><b>Click any row to select that track in Live</b> — and because every mapped knob follows the selection, your whole controller re-targets at once.</p>
+          <p class="mini">Open with the <kbd>Tracks</kbd> button, the tray menu, or <kbd>⌘T</kbd>.</p>
+        </div>
+      </div>
+
+      <div class="showcase flip">
+        <div class="showcase-media"><img src="img/setup.png" alt="Guided four-step setup" /></div>
+        <div class="showcase-copy">
+          <h3><span class="ic">✅</span>Set up in four guided steps</h3>
+          <p>The app ships the Ableton bridge and <b>installs it for you</b> on first launch. Each step lights up green as it completes.</p>
+          <p>No scripting, no Terminal, no config files — connect your controller and go.</p>
+        </div>
+      </div>
+
+      <div class="showcase">
+        <div class="showcase-media narrow"><img src="img/panel.png" alt="Menu-bar popover panel" /></div>
+        <div class="showcase-copy">
+          <h3><span class="ic">🖥️</span>Always one glance away</h3>
+          <p>A compact menu-bar popover mirrors your mapped knobs in real time and shows the track you're controlling — without opening the full window.</p>
+          <p class="mini">Left-click the tray icon for the popover; right-click for status and quick actions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section class="how" id="how">
+    <div class="wrap">
+      <div class="section-head" style="margin-left:auto;margin-right:auto;text-align:center">
+        <div class="eyebrow">How it works</div>
+        <h2>A small, local, well-understood stack</h2>
+        <p style="margin:0 auto">Ableton has no network API and apps can't speak Live's protocol directly. Mult Console bridges the gap — entirely on your machine.</p>
+      </div>
+      <div class="flow">
+        <div class="flow-node"><span class="ic">🎛️</span><b>MIDI controller</b><span>Web MIDI</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node app"><span class="ic">🎚️</span><b>Mult Console</b><span>desktop app</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><span class="ic">🔌</span><b>Node bridge</b><span>bundled · WS ↔ OSC</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><span class="ic">📡</span><b>AbletonOSC</b><span>remote script</span></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node live"><span class="ic">🎹</span><b>Ableton Live</b><span>your set</span></div>
+      </div>
+      <p class="how-note">The bridge runs <b>inside the app</b> — no separate server to manage. Selected-track and parameter values stream back the same way, so the on-screen knobs always match Live.</p>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section class="pricing" id="pricing">
+    <div class="wrap">
+      <div class="section-head" style="margin-left:auto;margin-right:auto;text-align:center">
+        <div class="eyebrow">Pricing</div>
+        <h2>Buy once. Own it.</h2>
+        <p style="margin:0 auto">A perpetual license — including every <code style="color:var(--amber)">1.x</code> update. 14-day free trial, no card required.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="plan">
+          <div class="name">Solo</div>
+          <div class="price">$29</div>
+          <div class="seats">1 machine</div>
+          <ul>
+            <li>Every feature, unlocked</li>
+            <li>Use in paid / commercial work</li>
+            <li>All 1.x updates</li>
+            <li class="off">Priority support</li>
+            <li class="off">Multi-seat deployment</li>
+          </ul>
+          <a class="btn ghost" href="https://github.com/MaxFishman/mult-console/releases/latest">Get Solo</a>
+        </div>
+        <div class="plan featured">
+          <div class="tag">Most popular</div>
+          <div class="name">Studio</div>
+          <div class="price">$59</div>
+          <div class="seats">Up to 3 machines</div>
+          <ul>
+            <li>Everything in Solo</li>
+            <li>3 activations, movable anytime</li>
+            <li>Use in paid / commercial work</li>
+            <li>Priority email support</li>
+            <li class="off">Multi-seat deployment</li>
+          </ul>
+          <a class="btn amber" href="https://github.com/MaxFishman/mult-console/releases/latest">Get Studio</a>
+        </div>
+        <div class="plan">
+          <div class="name">Site</div>
+          <div class="price">$199</div>
+          <div class="seats">Unlimited, one facility</div>
+          <ul>
+            <li>Everything in Studio</li>
+            <li>Unlimited installs on-site</li>
+            <li>Lab / classroom deployment</li>
+            <li>Priority support</li>
+            <li>Invoice / PO billing</li>
+          </ul>
+          <a class="btn ghost" href="https://github.com/MaxFishman/mult-console/issues">Contact for Site</a>
+        </div>
+      </div>
+      <p class="pricing-foot"><b>14-day money-back guarantee.</b> Keys activate offline — no account, no activation server.</p>
+    </div>
+  </section>
+
+  <!-- License showcase -->
+  <section>
+    <div class="wrap">
+      <div class="showcase">
+        <div class="showcase-media"><img src="img/license.png" alt="In-app license activation" /></div>
+        <div class="showcase-copy">
+          <h3><span class="ic">🔑</span>Activate offline, in seconds</h3>
+          <p><b>14-day free trial</b> — fully featured, nothing locked. When it ends the app keeps working; you'll just see a reminder to activate.</p>
+          <p>Paste your key into <b>Mult Console → License</b> and you're done. Keys are cryptographically signed and verified <b>entirely on your machine</b> — no network required.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Specs -->
+  <section class="specs">
+    <div class="wrap">
+      <div class="section-head"><div class="eyebrow">System requirements</div><h2>What you need</h2></div>
+      <div class="specs-grid">
+        <div class="spec"><div class="k">Operating system</div><div class="v">macOS 12+ · Windows 10/11</div></div>
+        <div class="spec"><div class="k">DAW</div><div class="v">Ableton Live 11 or 12</div></div>
+        <div class="spec"><div class="k">Controller</div><div class="v">Any MIDI controller (CC)</div></div>
+        <div class="spec"><div class="k">Disk</div><div class="v">~200 MB</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Download -->
+  <section class="download" id="download">
+    <div class="wrap">
+      <div class="section-head" style="margin-left:auto;margin-right:auto;text-align:center">
+        <div class="eyebrow">Download</div>
+        <h2>Start your free trial</h2>
+        <p style="margin:0 auto">Fully featured for 14 days. Install, open the guided setup, and you're mapping in minutes.</p>
+      </div>
+      <div class="dl-card">
+        <div class="dl-os">
+          <div>
+            <h3>🍎 macOS — one line</h3>
+            <div class="code">curl -fsSL https://raw.githubusercontent.com/MaxFishman/mult-console/main/install.sh | bash</div>
+            <p class="dl-note">Downloads the right build, installs to Applications, clears the Gatekeeper flag, and opens it. Prefer a <code>.dmg</code>? Grab it from the releases page and open it once via right-click → Open.</p>
+          </div>
+          <div>
+            <h3>🪟 Windows</h3>
+            <div class="code">Download the installer (.exe)</div>
+            <p class="dl-note">Run the installer from the latest release. After launch, the in-app Setup installs the Ableton bridge for you — you'll just restart Live and pick the Control Surface.</p>
+          </div>
+        </div>
+        <div style="margin-top:24px;display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
+          <a class="btn amber lg" href="https://github.com/MaxFishman/mult-console/releases/latest">⬇ Download latest release</a>
+          <a class="btn ghost lg" href="https://github.com/MaxFishman/mult-console">View on GitHub</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <div class="wrap">
+      <div class="section-head"><div class="eyebrow">Questions</div><h2>Good to know</h2></div>
+      <div class="faq-grid">
+        <details class="faq"><summary>Do I need AbletonOSC?</summary><p>Yes — it's how the app talks to Live. The good news: it's <b>bundled with Mult Console and installed for you</b> on first launch. You only restart Live and pick the Control Surface, which the guided setup walks you through.</p></details>
+        <details class="faq"><summary>Which controllers work?</summary><p>Any class-compliant MIDI controller that sends Control Change (CC) messages — the usual output of faders and knobs. Note messages are ignored for now.</p></details>
+        <details class="faq"><summary>Does it phone home?</summary><p>No. Everything runs locally — mappings, the bridge, and license verification. No account, no cloud, no telemetry.</p></details>
+        <details class="faq"><summary>How does the license work?</summary><p>A perpetual license for the version you buy, including all 1.x updates. Keys are cryptographically signed and verified <b>offline</b> — paste yours into Mult Console → License. Move an activation between your machines anytime.</p></details>
+        <details class="faq"><summary>Can I use it in paid gigs and releases?</summary><p>Absolutely. Every tier allows commercial use — on stage, in the studio, and in client work. No royalties, no per-project fees.</p></details>
+        <details class="faq"><summary>macOS says the app is damaged / unverified.</summary><p>The build is signed but not Apple-notarized, so macOS asks the first time. Use the one-line installer (it clears the quarantine flag), or run <code>xattr -cr "/Applications/Mult Console.app"</code> once.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <img src="img/app-icon.png" alt="" />
+          <b>Mult&nbsp;Console</b>
+        </div>
+        <div class="footer-links">
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#download">Download</a>
+          <a href="https://github.com/MaxFishman/mult-console">GitHub</a>
+          <a href="https://github.com/MaxFishman/mult-console/issues">Support</a>
+        </div>
+      </div>
+      <div class="footer-legal">
+        © 2026 Daniel Fishman. Mult Console is a commercial product.<br />
+        AbletonOSC is an independent open-source project (MIT), redistributed with permission. Ableton® and Ableton Live® are trademarks of Ableton AG; Mult Console is an independent product and is not affiliated with, sponsored by, or endorsed by Ableton AG.
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
