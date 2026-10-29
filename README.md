@@ -276,5 +276,5 @@ npm run dist:win     # Windows .nsis installer
 ---
 
 <div align="center">
-<sub>© 2026 Daniel Fishman · Mult Console is a commercial product. The source in this repository is provided for transparency and self-hosting; see <a href="#pricing--licensing">Pricing &amp; licensing</a> for usage terms.</sub>
+<sub>© 2026 Max Fishman · Mult Console is a commercial product. The source in this repository is provided for transparency and self-hosting; see <a href="#pricing--licensing">Pricing &amp; licensing</a> for usage terms.</sub>
 </div>
