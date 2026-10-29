@@ -26,6 +26,13 @@ function createLicense({ userDataDir, publicKeyPem, isPackaged, now }) {
   // MULT_FORCE_TRIAL is set (handy for exercising the trial UI locally).
   const trialActive = isPackaged || !!process.env.MULT_FORCE_TRIAL;
 
+  // QA override: MULT_TRIAL_DAYS shortens the trial (e.g. 0 = immediately
+  // expired) so the trial/expired UI can be exercised without waiting.
+  const trialDays = (() => {
+    const v = Number(process.env.MULT_TRIAL_DAYS);
+    return Number.isFinite(v) && v >= 0 ? v : TRIAL_DAYS;
+  })();
+
   function readJson(file) {
     try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch { return null; }
   }
@@ -60,13 +67,13 @@ function createLicense({ userDataDir, publicKeyPem, isPackaged, now }) {
         trialDaysLeft: null, trialTotal: TRIAL_DAYS };
     }
     if (!trialActive) {
-      return { state: "dev", tier: null, trialDaysLeft: null, trialTotal: TRIAL_DAYS };
+      return { state: "dev", tier: null, trialDaysLeft: null, trialTotal: trialDays };
     }
     const elapsed = nowMs() - trialStart();
-    const daysLeft = Math.max(0, Math.ceil((TRIAL_DAYS * DAY_MS - elapsed) / DAY_MS));
+    const daysLeft = Math.max(0, Math.ceil((trialDays * DAY_MS - elapsed) / DAY_MS));
     return {
       state: daysLeft > 0 ? "trial" : "expired",
-      tier: null, trialDaysLeft: daysLeft, trialTotal: TRIAL_DAYS,
+      tier: null, trialDaysLeft: daysLeft, trialTotal: trialDays,
     };
   }
 

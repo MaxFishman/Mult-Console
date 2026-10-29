@@ -14,8 +14,8 @@ set -euo pipefail
 REPO="MaxFishman/mult-console"
 APP="/Applications/Mult Console.app"
 
-# Pick the right build for this Mac.
-if [ "$(uname -m)" = "arm64" ]; then PATTERN="arm64"; else PATTERN="intel"; fi
+# Pick the right build for this Mac. electron-builder names the Intel dmg "-x64".
+if [ "$(uname -m)" = "arm64" ]; then PATTERN="arm64"; else PATTERN="x64"; fi
 
 echo "→ Finding the latest Mult Console ($PATTERN) release…"
 URL=$(curl -fsSL "https://api.github.com/repos/$REPO/releases/latest" \

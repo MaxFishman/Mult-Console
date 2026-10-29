@@ -18,7 +18,8 @@ them by hand. Two ways to run it:
 CI then builds on macOS **and** Windows and uploads to a **draft** GitHub
 Release (tag `v1.0.1`):
 
-- `Mult Console-1.0.1-arm64.dmg` + `.zip` (macOS)
+- `Mult Console-1.0.1-arm64.dmg` + `.zip` (Apple Silicon)
+- `Mult Console-1.0.1-x64.dmg` + `.zip` (Intel Mac)
 - `Mult Console Setup 1.0.1.exe` (Windows)
 - `latest-mac.yml`, `latest.yml`, and `.blockmap` files — **the auto-updater
   needs these; leave them attached.**
