@@ -14,7 +14,7 @@
         <span class="brand-name">Mult&nbsp;Console</span>
       </div>
       <div class="status-cluster">
-        <span class="led" id="pill-bridge" data-state="off"><i></i>Bridge</span>
+        <span class="led" id="pill-bridge" data-state="off" title="Bridge connection"><i></i><span class="led-label">Bridge</span></span>
         <span class="led" id="pill-ableton" data-state="off"><i></i>Ableton</span>
         <span class="led" id="pill-midi" data-state="off"><i></i>MIDI</span>
         <button class="btn ghost" id="refresh-conn" title="Re-sync with Ableton after switching projects">↻ Refresh</button>
@@ -293,6 +293,9 @@
         </div>
       </div>
     </template>
+
+    <!-- Transient notifications (connection loss, OSC/bridge errors) -->
+    <div id="toasts" class="toasts" aria-live="polite" aria-atomic="false"></div>
 
     <script src="app.js"></script>
   </body>

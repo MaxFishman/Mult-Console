@@ -105,6 +105,34 @@ body {
 }
 .led[data-state="on"] { color: var(--live-text); }
 .led[data-state="on"] i { background: var(--good); box-shadow: 0 0 7px var(--good); }
+/* Bridge pill reconnecting state: amber + pulsing, click to retry now. */
+.led[data-state="wait"] { color: var(--accent); }
+.led[data-state="wait"] i {
+  background: var(--accent); box-shadow: 0 0 7px var(--accent);
+  animation: pill-pulse 1s ease-in-out infinite;
+}
+#pill-bridge[data-state="off"], #pill-bridge[data-state="wait"] { cursor: pointer; }
+@keyframes pill-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* Toasts: transient connection/error notifications, bottom-right. */
+.toasts {
+  position: fixed; right: 16px; bottom: 16px; z-index: 9999;
+  display: flex; flex-direction: column; gap: 8px; max-width: 320px;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto; cursor: pointer;
+  padding: 10px 14px; border-radius: 6px;
+  font-size: 13px; line-height: 1.35; color: var(--live-text);
+  background: var(--live-bg-2); border: 1px solid var(--live-line);
+  border-left: 3px solid var(--live-line);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+  animation: toast-in 0.18s ease-out;
+}
+.toast.error { border-left-color: var(--bad); }
+.toast.warn  { border-left-color: var(--accent); }
+.toast.ok    { border-left-color: var(--good); }
+@keyframes toast-in { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
 
 /* -------------------------------------------------------------------- Main */
 main {
