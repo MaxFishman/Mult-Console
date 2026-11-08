@@ -157,9 +157,9 @@ body {
   color: var(--accent-ink);
   background: var(--accent);
   border-color: var(--accent);
-  animation: pill-pulse 1.4s ease-in-out infinite;
+  animation: chip-pulse 1.4s ease-in-out infinite;
 }
-@keyframes pill-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+@keyframes chip-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
 
 /* -------------------------------------------------------------------- Main */
 main {
