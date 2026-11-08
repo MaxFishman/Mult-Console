@@ -17,13 +17,18 @@
 const WS_URL = `ws://${location.host}`;
 let ws = null;
 let wsReady = false;
+let reconnectTimer = null;
+let reconnectAttempt = 0;
 
 function connect() {
   ws = new WebSocket(WS_URL);
   ws.onopen = () => {
+    const wasDown = reconnectAttempt > 0;
     wsReady = true;
-    setPill("bridge", true);
+    reconnectAttempt = 0;
+    setBridgeState("on");
     logMsg("out", "bridge connected");
+    if (wasDown) showToast("Reconnected to the bridge", "ok", 3000);
     // Subscribe to Live's selected-track changes + fetch current state.
     oscSend("/live/view/start_listen/selected_track", []);
     oscSend("/live/view/get/selected_track", []);
@@ -32,13 +37,33 @@ function connect() {
   };
   ws.onclose = () => {
     wsReady = false;
-    setPill("bridge", false);
     setPill("ableton", false);
-    logMsg("err", "bridge disconnected — retrying in 2s");
-    setTimeout(connect, 2000);
+    scheduleReconnect();
   };
   ws.onerror = () => {};
   ws.onmessage = (ev) => handleBridgeMessage(JSON.parse(ev.data));
+}
+
+// Reconnect with exponential backoff (2s, 4s, 8s … capped at 15s) and a
+// visible "reconnecting (attempt N)" state on the Bridge pill. The pill is
+// clickable while down to retry immediately.
+function scheduleReconnect() {
+  reconnectAttempt++;
+  const delay = Math.min(15000, 1000 * 2 ** Math.min(reconnectAttempt, 4));
+  setBridgeState("wait", reconnectAttempt);
+  if (reconnectAttempt === 1) {
+    logMsg("err", "bridge disconnected — reconnecting…");
+    showToast("Lost connection to the bridge — reconnecting…", "warn");
+  }
+  clearTimeout(reconnectTimer);
+  reconnectTimer = setTimeout(connect, delay);
+}
+
+// Retry immediately (used by the Bridge pill click), skipping the backoff wait.
+function reconnectNow() {
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+  clearTimeout(reconnectTimer);
+  connect();
 }
 
 function oscSend(address, args) {
@@ -53,6 +78,7 @@ function handleBridgeMessage(msg) {
   }
   if (msg.type === "error") {
     logMsg("err", msg.message);
+    showToast(msg.message, "error");
     return;
   }
   if (msg.type === "osc") {
@@ -1247,6 +1273,40 @@ function setPill(name, on) {
   pushStatus();
 }
 
+// Bridge pill has three states: on / off / wait (reconnecting). The label and
+// tooltip reflect retry progress; pushStatus still reports bridge=false unless on.
+function setBridgeState(st, attempt) {
+  const pill = document.getElementById("pill-bridge");
+  if (!pill) return;
+  pill.dataset.state = st; // "on" | "off" | "wait"
+  const label = pill.querySelector(".led-label");
+  if (label) label.textContent = st === "wait" ? `Reconnecting… (${attempt})` : "Bridge";
+  pill.title =
+    st === "on"
+      ? "Bridge connected"
+      : st === "wait"
+      ? `Lost connection — retrying (attempt ${attempt}). Click to retry now.`
+      : "Bridge offline — click to reconnect";
+  pushStatus();
+}
+
+// Transient bottom-right notification. kind: "info" | "ok" | "warn" | "error".
+// Identical messages within 4s are collapsed so a chatty error can't flood.
+let _lastToast = { msg: null, at: 0 };
+function showToast(message, kind = "info", ttl = 6000) {
+  const host = document.getElementById("toasts");
+  if (!host) return;
+  const now = Date.now();
+  if (message === _lastToast.msg && now - _lastToast.at < 4000) return;
+  _lastToast = { msg: message, at: now };
+  const t = document.createElement("div");
+  t.className = `toast ${kind}`;
+  t.textContent = message;
+  t.onclick = () => t.remove();
+  host.appendChild(t);
+  if (ttl) setTimeout(() => t.remove(), ttl);
+}
+
 // Mirror current status to the tray (desktop) and the popover panel (over WS).
 function pushStatus() {
   const pill = (id) => document.getElementById(id)?.dataset.state === "on";
@@ -1292,6 +1352,11 @@ function refreshConnection() {
   loadSong();
 }
 document.getElementById("refresh-conn").onclick = refreshConnection;
+
+// Clicking the Bridge pill while it's down forces an immediate reconnect.
+document.getElementById("pill-bridge").onclick = () => {
+  if (!wsReady) reconnectNow();
+};
 
 // Preset bar wiring.
 document.getElementById("preset-select").onchange = (e) => selectPreset(e.target.value);
