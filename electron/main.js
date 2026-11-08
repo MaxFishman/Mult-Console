@@ -121,6 +121,7 @@ function registerIpc() {
     sendUpdateStatus({ status: "error", message: err.message });
   });
 
+  ipcMain.handle("app:getVersion", () => app.getVersion());
   ipcMain.handle("updates:check", async () => {
     if (!app.isPackaged) return { status: "unavailable" };
     try {

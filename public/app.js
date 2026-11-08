@@ -1541,13 +1541,50 @@ if (window.desktop) {
   if (window.desktop.onRefresh) window.desktop.onRefresh(() => refreshConnection());
   const updates = window.desktop.updates;
   const updateBtn = document.getElementById("check-updates");
+  const versionChip = document.getElementById("app-version");
   if (updates && updateBtn) {
     updateBtn.hidden = false;
+
+    // Version chip: always shows the running version, and reflects update state.
+    let appVersion = null;    // currently-running version, e.g. "1.0.0"
+    let latestVersion = null; // newer version offered by GitHub, if any
+    let updateReady = false;  // a newer build is downloaded and installable now
+
+    const renderVersionChip = () => {
+      if (!versionChip || !appVersion) return;
+      versionChip.hidden = false;
+      if (updateReady && latestVersion) {
+        versionChip.textContent = `v${appVersion} → ${latestVersion} · install`;
+        versionChip.dataset.state = "ready";
+        versionChip.title = `Update ${latestVersion} downloaded — click to restart and install`;
+      } else if (latestVersion) {
+        versionChip.textContent = `v${appVersion} → ${latestVersion}`;
+        versionChip.dataset.state = "available";
+        versionChip.title = `Version ${latestVersion} is available and downloading`;
+      } else {
+        versionChip.textContent = `v${appVersion}`;
+        versionChip.dataset.state = "current";
+        versionChip.title = "Current version — click to check for updates";
+      }
+    };
+    if (versionChip && updates.getVersion) {
+      updates.getVersion().then((v) => { appVersion = v; renderVersionChip(); });
+      // Clicking the chip installs when ready, otherwise checks for updates.
+      versionChip.onclick = () => (updateReady ? updates.install() : checkForUpdates());
+    }
+
     const checkForUpdates = async () => {
       updateBtn.textContent = "Checking…";
       updateBtn.disabled = true;
       const result = await updates.check();
-      if (result.status === "error") showUpdateStatus(result);
+      if (result.status === "error") {
+        showUpdateStatus(result);
+      } else if (result.status === "unavailable") {
+        // Dev/browser build — the auto-updater only runs in packaged apps.
+        updateBtn.textContent = "Updates in packaged app only";
+        updateBtn.disabled = true;
+        setTimeout(resetUpdateButton, 4000);
+      }
     };
     const resetUpdateButton = () => {
       updateBtn.textContent = "Check for updates";
@@ -1560,16 +1597,25 @@ if (window.desktop) {
         updateBtn.textContent = "Checking…";
         updateBtn.disabled = true;
       } else if (update.status === "available") {
+        latestVersion = update.version;
+        updateReady = false;
+        renderVersionChip();
         updateBtn.textContent = `Downloading ${update.version}…`;
         updateBtn.disabled = true;
       } else if (update.status === "downloading") {
         updateBtn.textContent = `Downloading ${Math.floor(update.percent)}%`;
         updateBtn.disabled = true;
       } else if (update.status === "downloaded") {
+        latestVersion = update.version;
+        updateReady = true;
+        renderVersionChip();
         updateBtn.textContent = `Restart to install ${update.version}`;
         updateBtn.disabled = false;
         updateBtn.onclick = () => updates.install();
       } else if (update.status === "current") {
+        latestVersion = null;
+        updateReady = false;
+        renderVersionChip();
         updateBtn.textContent = "Up to date";
         updateBtn.disabled = true;
         setTimeout(resetUpdateButton, 4000);
