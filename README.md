@@ -16,7 +16,7 @@ No re-mapping. No scripting. No MIDI-clutter.
 ![Platform](https://img.shields.io/badge/platform-macOS_%7C_Windows-444?style=flat-square)
 ![Ableton](https://img.shields.io/badge/Ableton_Live-11_%7C_12-444?style=flat-square)
 ![License](https://img.shields.io/badge/license-Commercial-444?style=flat-square)
-![Version](https://img.shields.io/badge/version-1.0.0-444?style=flat-square)
+![Version](https://img.shields.io/badge/version-1.1.0-444?style=flat-square)
 
 </div>
 
