@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<!--
+  Mult Console — Max for Live UI  (loaded into a [jweb] object in the device)
+
+  This is the web UI from the desktop app, re-pointed at the M4L engine. It no
+  longer speaks WebSocket/OSC or Web MIDI; instead it talks to mult-console.js
+  through the Max jweb bridge:
+      page -> patch :  window.max.outlet("ui", <json>)
+      patch -> page :  window.max.bindInlet("toui", fn)   // engine's toUi()
+  Falls back to a no-op bridge so the page still renders in a plain browser.
+-->
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  :root { --track-color: #ffb430; --bg: #14161a; --panel: #1c1f26; --line: #2a2f3a;
+          --text: #e7ebf0; --dim: #8b93a1; --accent: #ff8a3d; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 13px/1.4 -apple-system, Segoe UI, system-ui, sans-serif;
+         background: var(--bg); color: var(--text); }
+  header { display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+           border-bottom: 1px solid var(--line); background: var(--panel); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--track-color); }
+  #track-name { font-weight: 600; }
+  #track-sub { color: var(--dim); font-size: 12px; }
+  .spacer { flex: 1; }
+  button { font: inherit; color: var(--text); background: #262b34; border: 1px solid var(--line);
+           border-radius: 6px; padding: 5px 10px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.learning { background: var(--accent); color: #111; border-color: var(--accent); }
+  select, input[type=text] { font: inherit; color: var(--text); background: #11141a;
+           border: 1px solid var(--line); border-radius: 5px; padding: 3px 6px; }
+  #rack { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+          gap: 10px; padding: 12px; }
+  .unit { background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+          padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .unit-top { display: flex; align-items: center; gap: 8px; }
+  .unit-top input { flex: 1; }
+  .knob-wrap { display: flex; align-items: center; gap: 10px; }
+  .knob { width: 70px; height: 70px; flex: none; }
+  .knob-track { fill: none; stroke: #2a2f3a; stroke-width: 7; }
+  .knob-value { fill: none; stroke: var(--track-color); stroke-width: 7; stroke-linecap: round; }
+  .knob-ghost { stroke: var(--dim); stroke-width: 2; opacity: 0; }
+  .unit.waiting .knob-value { opacity: .35; }
+  .meter { display: flex; flex-direction: column; }
+  .meter-text { font-size: 18px; font-weight: 600; }
+  .meter-label { color: var(--dim); font-size: 11px; }
+  .midi-readout { color: var(--dim); font-size: 11px; }
+  .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .row label { color: var(--dim); font-size: 11px; display: flex; gap: 4px; align-items: center; }
+  .hidden { display: none !important; }
+  #empty { color: var(--dim); padding: 30px; text-align: center; }
+</style>
+</head>
+<body>
+  <header>
+    <span class="dot"></span>
+    <div>
+      <div id="track-name">No track</div>
+      <div id="track-sub">Select a track in Live</div>
+    </div>
+    <span class="spacer"></span>
+    <button id="add">+ Add control</button>
+    <button id="refresh" title="Re-read the selected track">Refresh</button>
+  </header>
+  <div id="empty">No controls yet — click “Add control”, then “Learn” and wiggle a knob.</div>
+  <div id="rack"></div>
+
+<script>
+// --- Max jweb bridge (or browser no-op) --------------------------------------
+const MX = (typeof window !== "undefined" && window.max) ? window.max : null;
+function toPatch(obj) { if (MX) MX.outlet("ui", JSON.stringify(obj)); }
+if (MX && MX.bindInlet) MX.bindInlet("toui", (json) => {
+  try { onEngine(JSON.parse(json)); } catch (e) {}
+});
+
+// --- Local view state --------------------------------------------------------
+let track = { name: "", color: "#ffb430", numDevices: 0, devices: [] };
+let mappings = [];
+let learnId = null;
+
+// --- Incoming messages from the engine ---------------------------------------
+function onEngine(msg) {
+  switch (msg.kind) {
+    case "track":
+      track = msg;
+      document.documentElement.style.setProperty("--track-color", msg.color || "#ffb430");
+      document.getElementById("track-name").textContent = msg.name || "No track";
+      document.getElementById("track-sub").textContent =
+        (msg.numDevices || 0) + " device" + (msg.numDevices === 1 ? "" : "s");
+      renderOptions();
+      break;
+    case "mappings":
+      mappings = msg.mappings || [];
+      learnId = msg.learn;
+      render();
+      break;
+    case "learn":
+      learnId = msg.id;
+      renderLearn();
+      break;
+    case "meter":
+      setMeter(msg.id, msg.norm, msg.value, msg.label);
+      break;
+    case "waiting":
+      setWaiting(msg.id, msg.physNorm);
+      break;
+  }
+}
+
+// --- Knob geometry (from the desktop app) ------------------------------------
+const CIRC = 251.327, ARC = 188.495;
+
+function render() {
+  const rack = document.getElementById("rack");
+  rack.innerHTML = "";
+  document.getElementById("empty").style.display = mappings.length ? "none" : "block";
+  for (const m of mappings) rack.appendChild(unitEl(m));
+  renderLearn();
+}
+
+function unitEl(m) {
+  const u = document.createElement("div");
+  u.className = "unit";
+  u.dataset.id = m.id;
+  u.innerHTML = `
+    <div class="unit-top">
+      <input class="name" type="text" value="${esc(m.name || "")}">
+      <button class="learn">Learn</button>
+      <button class="remove" title="Remove">✕</button>
+    </div>
+    <div class="knob-wrap">
+      <svg class="knob" viewBox="0 0 100 100">
+        <circle class="knob-track" cx="50" cy="50" r="40"
+          stroke-dasharray="${ARC} ${CIRC}" transform="rotate(135 50 50)"/>
+        <circle class="knob-value" cx="50" cy="50" r="40"
+          stroke-dasharray="0 ${CIRC}" transform="rotate(135 50 50)"/>
+        <line class="knob-ghost" x1="50" y1="14" x2="50" y2="26" transform="rotate(225 50 50)"/>
+      </svg>
+      <div class="meter">
+        <span class="meter-text">—</span>
+        <span class="meter-label"></span>
+        <span class="midi-readout">unassigned</span>
+      </div>
+    </div>
+    <div class="row">
+      <select class="targetkind">
+        <option value="device">Device param</option>
+        <option value="mixer">Mixer</option>
+        <option value="transport">Timeline scrub</option>
+      </select>
+      <select class="device hidden"></select>
+      <select class="param hidden"></select>
+      <select class="mixerfield hidden">
+        <option value="volume">Volume</option><option value="panning">Pan</option>
+        <option value="send">Send</option><option value="mute">Mute</option>
+        <option value="solo">Solo</option><option value="arm">Arm</option>
+      </select>
+      <select class="sendindex hidden">
+        <option value="0">A</option><option value="1">B</option>
+        <option value="2">C</option><option value="3">D</option>
+      </select>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" class="pickup"> Pickup</label>
+      <label><input type="checkbox" class="invert"> Invert</label>
+      <label class="buttonmode-wrap hidden">Button
+        <select class="buttonmode"><option value="toggle">Toggle</option>
+          <option value="momentary">Momentary</option></select>
+      </label>
+    </div>`;
+
+  const patch = (p) => toPatch({ cmd: "update", id: m.id, patch: p });
+
+  u.querySelector(".name").oninput = (e) => patch({ name: e.target.value });
+  u.querySelector(".remove").onclick = () => toPatch({ cmd: "remove", id: m.id });
+  u.querySelector(".learn").onclick = () => toPatch({ cmd: "learn", id: m.id });
+
+  const tk = u.querySelector(".targetkind");
+  tk.value = m.targetKind || "device";
+  tk.onchange = () => { patch({ targetKind: tk.value }); };
+
+  const dev = u.querySelector(".device");
+  dev.onchange = () => patch({ deviceIndex: Number(dev.value), paramIndex: 0 });
+  const par = u.querySelector(".param");
+  par.onchange = () => patch({ paramIndex: Number(par.value) });
+
+  const mf = u.querySelector(".mixerfield");
+  mf.value = m.field || "volume";
+  mf.onchange = () => patch({ field: mf.value });
+  const si = u.querySelector(".sendindex");
+  si.value = String(m.sendIndex || 0);
+  si.onchange = () => patch({ sendIndex: Number(si.value) });
+
+  const pu = u.querySelector(".pickup"); pu.checked = m.pickup !== false;
+  pu.onchange = () => patch({ pickup: pu.checked });
+  const inv = u.querySelector(".invert"); inv.checked = !!m.invert;
+  inv.onchange = () => patch({ invert: inv.checked });
+  const bm = u.querySelector(".buttonmode"); bm.value = m.buttonMode || "toggle";
+  bm.onchange = () => patch({ buttonMode: bm.value });
+
+  applyVisibility(u, m);
+  fillOptions(u, m);
+  return u;
+}
+
+function applyVisibility(u, m) {
+  const kind = m.targetKind || "device";
+  const isNote = (m.inputKind || "cc") === "note";
+  u.querySelector(".device").classList.toggle("hidden", kind !== "device");
+  u.querySelector(".param").classList.toggle("hidden", kind !== "device");
+  u.querySelector(".mixerfield").classList.toggle("hidden", kind !== "mixer");
+  u.querySelector(".sendindex").classList.toggle("hidden",
+    !(kind === "mixer" && (m.field || "volume") === "send"));
+  u.querySelector(".buttonmode-wrap").classList.toggle("hidden", !isNote);
+}
+
+function fillOptions(u, m) {
+  const dev = u.querySelector(".device");
+  dev.innerHTML = "";
+  const devCount = Math.max(track.numDevices || 0, (m.deviceIndex || 0) + 1, 1);
+  for (let d = 0; d < devCount; d++) {
+    const info = track.devices[d];
+    const o = document.createElement("option");
+    o.value = d; o.textContent = info ? `${d + 1}. ${info.name}` : `Slot ${d + 1} (empty)`;
+    dev.appendChild(o);
+  }
+  dev.value = String(m.deviceIndex || 0);
+
+  const par = u.querySelector(".param");
+  par.innerHTML = "";
+  const info = track.devices[m.deviceIndex || 0];
+  const pCount = info ? Math.max(info.params.length, (m.paramIndex || 0) + 1) : (m.paramIndex || 0) + 1;
+  for (let p = 0; p < pCount; p++) {
+    const pm = info && info.params[p];
+    const o = document.createElement("option");
+    o.value = p; o.textContent = pm ? `${p}. ${pm.name}` : `#${p}`;
+    par.appendChild(o);
+  }
+  par.value = String(m.paramIndex || 0);
+}
+
+function renderOptions() {
+  for (const u of document.querySelectorAll(".unit")) {
+    const m = mappings.find((x) => x.id === Number(u.dataset.id));
+    if (m) fillOptions(u, m);
+  }
+}
+
+function renderLearn() {
+  for (const u of document.querySelectorAll(".unit")) {
+    const id = Number(u.dataset.id);
+    const m = mappings.find((x) => x.id === id);
+    const btn = u.querySelector(".learn");
+    const on = learnId === id;
+    btn.classList.toggle("learning", on);
+    btn.textContent = on ? "Listening…" : "Learn";
+    const r = u.querySelector(".midi-readout");
+    if (m && r) {
+      const ch = (m.channel ?? 0) + 1;
+      r.textContent = (m.inputKind || "cc") === "note"
+        ? (m.note == null ? "unassigned" : `Note ${m.note} · ch ${ch}`)
+        : (m.cc == null ? "unassigned" : `CC ${m.cc} · ch ${ch}`);
+    }
+  }
+}
+
+function unitById(id) {
+  return document.querySelector(`.unit[data-id="${id}"]`);
+}
+function setMeter(id, norm, value, label) {
+  const u = unitById(id); if (!u) return;
+  const clamped = Math.max(0, Math.min(1, norm));
+  u.querySelector(".knob-value").setAttribute("stroke-dasharray", `${clamped * ARC} ${CIRC}`);
+  u.querySelector(".meter-text").textContent =
+    typeof value === "number" ? (Math.abs(value) >= 100 ? value.toFixed(0) : value.toFixed(2)) : String(value);
+  if (label != null) u.querySelector(".meter-label").textContent = label;
+}
+function setWaiting(id, physNorm) {
+  const u = unitById(id); if (!u) return;
+  const ghost = u.querySelector(".knob-ghost");
+  if (physNorm == null) { u.classList.remove("waiting"); ghost.style.opacity = "0"; }
+  else {
+    u.classList.add("waiting");
+    ghost.setAttribute("transform", `rotate(${225 + physNorm * 270} 50 50)`);
+    ghost.style.opacity = "1";
+  }
+}
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+document.getElementById("add").onclick = () => toPatch({ cmd: "add" });
+document.getElementById("refresh").onclick = () => toPatch({ cmd: "refresh" });
+
+// Tell the engine we're ready so it pushes current state.
+toPatch({ cmd: "ready" });
+</script>
+</body>
+</html>
