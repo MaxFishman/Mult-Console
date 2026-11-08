@@ -454,7 +454,7 @@ function applyScrub(m, midiValue) {
     const near = Math.abs(norm - curNorm) <= 0.02;
     tk.lastInput = norm;
     if (!(crossed || near)) {
-      markWaiting(m.id, norm);
+      markWaiting(m.id, norm, curNorm);
       return;
     }
     tk.engaged = true;
@@ -489,7 +489,7 @@ function applyCC(m, midiValue) {
     const near = Math.abs(norm - curNorm) <= 0.02;
     tk.lastInput = norm;
     if (!(crossed || near)) {
-      markWaiting(m.id, norm);
+      markWaiting(m.id, norm, curNorm);
       return; // not caught yet — don't move the parameter
     }
     tk.engaged = true;
@@ -1195,8 +1195,10 @@ function refreshAllMeters() {
 }
 
 // Pickup "waiting to catch" indicator: shows a ghost tick at the physical
-// control's position until it crosses the parameter's current value.
-function markWaiting(id, physNorm) {
+// control's position, plus a catch-gap arc spanning from there to the target
+// value — so you can see at a glance which way to turn and how close you are.
+// The arc shrinks as you approach and shifts amber → green near the catch point.
+function markWaiting(id, physNorm, targetNorm) {
   const node = meterNode(id);
   if (!node) return;
   node.classList.add("waiting");
@@ -1205,13 +1207,29 @@ function markWaiting(id, physNorm) {
     ghost.setAttribute("transform", `rotate(${225 + physNorm * 270} 50 50)`);
     ghost.style.opacity = "1";
   }
+  const gap = node.querySelector(".knob-catchgap");
+  if (gap && targetNorm != null) {
+    const lo = Math.min(physNorm, targetNorm);
+    const hi = Math.max(physNorm, targetNorm);
+    const dist = hi - lo; // angular gap still to close, 0..1
+    gap.style.strokeDasharray = `${dist * KNOB_ARC} ${KNOB_CIRC}`;
+    gap.setAttribute("transform", `rotate(${135 + lo * 270} 50 50)`);
+    // Proximity colour: amber (far) → green (about to catch).
+    const near = Math.max(0, Math.min(1, 1 - dist / 0.25));
+    gap.style.stroke = `hsl(${30 + near * 110} 85% 55%)`;
+    // Direction arrow on the readout: which way the knob needs to move.
+    node.classList.toggle("catch-up", targetNorm > physNorm);
+    node.classList.toggle("catch-down", targetNorm < physNorm);
+  }
 }
 function clearWaiting(id) {
   const node = meterNode(id);
   if (!node) return;
-  node.classList.remove("waiting");
+  node.classList.remove("waiting", "catch-up", "catch-down");
   const ghost = node.querySelector(".knob-ghost");
   if (ghost) ghost.style.opacity = "0";
+  const gap = node.querySelector(".knob-catchgap");
+  if (gap) gap.style.strokeDasharray = `0 ${KNOB_CIRC}`;
 }
 
 function formatValue(v) {

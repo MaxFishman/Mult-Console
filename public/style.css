@@ -283,8 +283,20 @@ main {
   opacity: 0;
   transition: transform 0.05s linear, opacity 0.15s;
 }
+/* Catch-gap arc: the distance still to close, from the physical knob position
+   to the parameter value. Shrinks as you approach; colour set in JS by proximity
+   (amber when far → green at the catch point). */
+.knob-catchgap {
+  fill: none; stroke: var(--accent); stroke-width: 7;
+  stroke-linecap: round; stroke-dasharray: 0 251.327;
+  opacity: 0;
+  transition: stroke-dasharray 0.05s linear, stroke 0.15s, opacity 0.15s;
+}
 .unit.waiting .knob-value { opacity: 0.35; }
+.unit.waiting .knob-catchgap { opacity: 0.85; }
 .unit.waiting .knob-readout::after { content: " ·catch"; color: var(--accent); font-size: 10px; }
+.unit.waiting.catch-up .knob-readout::after { content: " ▲ catch"; }
+.unit.waiting.catch-down .knob-readout::after { content: " ▼ catch"; }
 .knob-readout {
   position: absolute;
   left: 0; right: 0; bottom: 30px;
