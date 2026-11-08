@@ -134,6 +134,33 @@ body {
 .toast.ok    { border-left-color: var(--good); }
 @keyframes toast-in { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
 
+/* Version chip: shows the running version; click to check for updates. When an
+   update is available it reads "v1.0.0 → 1.1.0", and turns amber (and installs
+   on click) once the new build is downloaded and ready. */
+.app-version {
+  font-family: var(--font-mono);
+  font-size: 11px; font-weight: 600;
+  color: var(--live-text-faint);
+  padding: 4px 8px;
+  border: 1px solid var(--live-line);
+  border-radius: 2px;
+  background: var(--live-bg-2);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.app-version:hover { color: var(--live-text-dim); }
+.app-version[data-state="available"] {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--live-line));
+}
+.app-version[data-state="ready"] {
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent);
+  animation: pill-pulse 1.4s ease-in-out infinite;
+}
+@keyframes pill-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
 /* -------------------------------------------------------------------- Main */
 main {
   max-width: 1040px;

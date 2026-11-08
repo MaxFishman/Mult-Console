@@ -23,6 +23,7 @@ contextBridge.exposeInMainWorld("desktop", {
   updates: {
     check: () => ipcRenderer.invoke("updates:check"),
     install: () => ipcRenderer.invoke("updates:install"),
+    getVersion: () => ipcRenderer.invoke("app:getVersion"),
     onStatus: (cb) => ipcRenderer.on("updates:status", (_event, status) => cb(status)),
   },
 
