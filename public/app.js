@@ -1247,6 +1247,12 @@ function markWaiting(id, physNorm, targetNorm) {
     node.classList.toggle("catch-up", targetNorm > physNorm);
     node.classList.toggle("catch-down", targetNorm < physNorm);
   }
+  // Mirror the waiting state to the popover panel so its mini-knob matches.
+  if (wsReady && targetNorm != null) {
+    ws.send(
+      JSON.stringify({ type: "ui", kind: "waiting", id, waiting: true, physNorm, targetNorm })
+    );
+  }
 }
 function clearWaiting(id) {
   const node = meterNode(id);
@@ -1256,6 +1262,7 @@ function clearWaiting(id) {
   if (ghost) ghost.style.opacity = "0";
   const gap = node.querySelector(".knob-catchgap");
   if (gap) gap.style.strokeDasharray = `0 ${KNOB_CIRC}`;
+  if (wsReady) ws.send(JSON.stringify({ type: "ui", kind: "waiting", id, waiting: false }));
 }
 
 function formatValue(v) {

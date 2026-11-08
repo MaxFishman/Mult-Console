@@ -325,6 +325,9 @@ main {
 .unit.waiting .knob-readout::after { content: " ·catch"; color: var(--accent); font-size: 10px; }
 .unit.waiting.catch-up .knob-readout::after { content: " ▲ catch"; }
 .unit.waiting.catch-down .knob-readout::after { content: " ▼ catch"; }
+/* Same catch-gap treatment on the popover mini-knob. */
+.panel-unit.waiting .knob-value { opacity: 0.35; }
+.panel-unit.waiting .knob-catchgap { opacity: 0.85; }
 .knob-readout {
   position: absolute;
   left: 0; right: 0; bottom: 30px;

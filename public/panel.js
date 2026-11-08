@@ -37,6 +37,7 @@ function handle(msg) {
   } else if (msg.type === "ui") {
     if (msg.kind === "status") applyStatus(msg.payload);
     else if (msg.kind === "knob") setKnob(msg.id, msg.norm, msg.value, msg.label);
+    else if (msg.kind === "waiting") setWaiting(msg.id, msg.waiting, msg.physNorm, msg.targetNorm);
   }
 }
 
@@ -121,6 +122,35 @@ function setKnob(id, norm, value, label) {
     typeof value === "number" ? (Math.abs(value) >= 100 ? value.toFixed(0) : value.toFixed(2)) : value;
   // Show the actual parameter the control is bound to, not the generic name.
   if (label) node.querySelector(".panel-unit-name").textContent = label;
+}
+
+// Mirror the main window's pickup catch-gap on the mini-knob: a ghost tick at
+// the physical position and a colour-graded arc of the gap left to close.
+function setWaiting(id, waiting, physNorm, targetNorm) {
+  const node = document.querySelector(`.panel-unit[data-id="${id}"]`);
+  if (!node) return;
+  const ghost = node.querySelector(".knob-ghost");
+  const gap = node.querySelector(".knob-catchgap");
+  if (!waiting) {
+    node.classList.remove("waiting");
+    if (ghost) ghost.style.opacity = "0";
+    if (gap) gap.style.strokeDasharray = `0 ${KNOB_CIRC}`;
+    return;
+  }
+  node.classList.add("waiting");
+  if (ghost) {
+    ghost.setAttribute("transform", `rotate(${225 + physNorm * 270} 50 50)`);
+    ghost.style.opacity = "1";
+  }
+  if (gap && targetNorm != null) {
+    const lo = Math.min(physNorm, targetNorm);
+    const hi = Math.max(physNorm, targetNorm);
+    const dist = hi - lo;
+    gap.style.strokeDasharray = `${dist * KNOB_ARC} ${KNOB_CIRC}`;
+    gap.setAttribute("transform", `rotate(${135 + lo * 270} 50 50)`);
+    const near = Math.max(0, Math.min(1, 1 - dist / 0.25));
+    gap.style.stroke = `hsl(${30 + near * 110} 85% 55%)`;
+  }
 }
 
 // Re-read mappings if the main window changes them (shared localStorage).
